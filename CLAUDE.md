@@ -88,6 +88,13 @@ Strona sama rozmieszcza części na płytce stykowej (`js/breadboard.js`) i gene
 - Kabli ma mało — projektuj tak, żeby było ich jak najmniej.
 - Podgląd w terminalu: `node scripts/bb.mjs <slug>` — jak piszesz `steps` z numerami dziurek, bierz je stąd, żeby zgadzały się z obrazkiem.
 - Zawsze są **dwa schematy**: logiczny (szyny 5V/GND, `js/diagram.js`) i płytka stykowa.
+- **Oznaczenia na płytce (Adam ich wymaga przy każdej części, też nowej):**
+  - przy nóżkach: dokąd idą (pin Nano, np. `D10`, `GND`), diody `+`/`−`, buzzer `+`/`−` pod spodem;
+  - przycisk: 4 nóżki w rogach, przy używanych `D2`/`GND`; napis „przycisk” na korpusie;
+  - moduły: nazwy pinów na korpusie modułu;
+  - napisy **na częściach**, nie obok; bez zbędnych podpisów (nazwy diod, wartości rezystorów itp. — nie).
+  - Nowa część dwunóżkowa → dopisz typ do `TWO_LEG`/`SPAN` w `js/breadboard.js`; wielonóżkowa rysuje się jako moduł z nazwami pinów. Po dodaniu obejrzyj rysunek płytki (np. zrzut Playwrightem) i sprawdź, czy oznaczenia są czytelne.
+- Kable na płytce: kąty proste, pionowe odcinki między kolumnami (nie zasłaniać dziurek i numerów), czarne kable z jasną obwódką, ciemne tło.
 
 ## Sprawozdanie (`report`)
 
