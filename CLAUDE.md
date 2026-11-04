@@ -84,7 +84,8 @@ Jeśli nie da się wypchnąć (brak dostępu), powiedz to wprost i daj kod/instr
 
 Strona sama rozmieszcza części na płytce stykowej (`js/breadboard.js`) i generuje listę „co gdzie wpiąć” (dziurki typu `e12`, szyny +/−). Tryb lab odhacza właśnie tę listę. Nano/ESP leży obok płytki i łączy się kabelkami (tak jak na labach).
 
-- Domyślnie duża płytka z szynami (63 kolumny). Mała bez szyn: `"breadboard": "mini"`. Bez widoku: `"breadboard": false`.
+- Domyślnie płytka **bez szyn** (Adam ich nie używa — nie każda jego płytka je ma). GND rozprowadzane wspólnymi kolumnami i dwoma pinami GND Nano, jak najmniej kabli (nóżki części wpinane prosto w kolumny tej samej sieci). Z szynami: `"breadboard": "rails"`, mała 30 kolumn: `"mini"`, bez widoku: `false`.
+- Kabli ma mało — projektuj tak, żeby było ich jak najmniej.
 - Podgląd w terminalu: `node scripts/bb.mjs <slug>` — jak piszesz `steps` z numerami dziurek, bierz je stąd, żeby zgadzały się z obrazkiem.
 - Zawsze są **dwa schematy**: logiczny (szyny 5V/GND, `js/diagram.js`) i płytka stykowa.
 

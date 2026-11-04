@@ -211,7 +211,7 @@ function bbSection(p) {
   const steps = breadboardSteps(L);
   return `<section class="card">
       <div class="card-h"><h2>Na płytce stykowej</h2><button class="btn small" data-zoom-bb>Powiększ</button></div>
-      <p class="hint">Tak to wpiąć w realu. Dziurki: litera = rząd, liczba = kolumna (np. <b>e12</b>). ${L.rails ? 'Szyny: + czerwona, − niebieska.' : ''}</p>
+      <p class="hint">Tak to wpiąć w realu. Dziurki: litera = rząd, liczba = kolumna (np. <b>e12</b>). ${L.rails ? 'Szyny: + czerwona, − niebieska.' : 'Bez szyn — GND idzie przez wspólne kolumny.'}</p>
       <div class="scroll bb-wrap">${renderBreadboard(L)}</div>
       <details class="bb-list" open><summary>Co gdzie wpiąć (${steps.length})</summary><ol class="steps">${steps.map((s) => `<li>${md(s)}</li>`).join('')}</ol></details>
       ${L.notes.length ? `<p class="hint warn-t">${L.notes.map(esc).join(' ')}</p>` : ''}

@@ -14,9 +14,10 @@ const TWO_LEG = new Set(['resistor', 'ldr', 'led', 'buzzer']);
 export function layoutBreadboard(project) {
   const board = getBoard(project.board);
   if (!board || project.breadboard === false) return null;
-  const kind = project.breadboard === 'mini' ? 'mini' : 'full';
+  // domyślnie płytka BEZ szyn (taka jest najczęściej na labach); "rails" = z szynami +/−, "mini" = 30 kolumn bez szyn
+  const kind = project.breadboard === 'rails' ? 'rails' : project.breadboard === 'mini' ? 'mini' : 'plain';
   const COLS = kind === 'mini' ? 30 : 63;
-  const rails = kind === 'full';
+  const rails = kind === 'rails';
   const parts = project.parts || [];
   const byId = Object.fromEntries(parts.map((p) => [p.id, p]));
   const wires = normWires(project).map((w) => ({ ...w, A: parseEnd(project, w.from), B: parseEnd(project, w.to) }))
@@ -97,7 +98,10 @@ export function layoutBreadboard(project) {
   }
   parts.forEach((p) => { if (!seen.has(p.id)) order.push(p.id); });
 
-  const findNetStrip = (net, half) => Object.keys(stripNet).find((k) => stripNet[k] === net && k[0] === half && (used[k] ? used[k].size : 0) < 4);
+  // kolumna z tą samą siecią i wolnymi dziurkami — najbliższa miejsca, w którym teraz układamy
+  const findNetStrip = (net, half) => Object.keys(stripNet)
+    .filter((k) => stripNet[k] === net && k[0] === half && (used[k] ? used[k].size : 0) < 4)
+    .sort((a, b) => Math.abs(+a.slice(1) - cursor.T) - Math.abs(+b.slice(1) - cursor.T))[0];
   const notes = [];
 
   order.forEach((id) => {
@@ -106,21 +110,32 @@ export function layoutBreadboard(project) {
     const pins = d.pins;
     if (TWO_LEG.has(p.type) && pins.length === 2) {
       const span = SPAN[p.type] || 1;
+      const MAX = p.type === 'resistor' ? 5 : 2; // na ile kolumn da się rozsunąć nóżki (dioda: max 2, żeby nie wchodziła na inne)
       let placed = false;
-      // spróbuj wpiąć jedną nóżkę w kolumnę, gdzie już jest ta sama sieć
+      const s0 = findNetStrip(netOf(id + ':' + pins[0].id), 'T');
+      const s1 = findNetStrip(netOf(id + ':' + pins[1].id), 'T');
+      // obie nóżki w kolumny, gdzie już są ich sieci (np. dioda: A do rezystora, C do kolumny GND) — zero dodatkowych kabli
+      if (s0 && s1 && s0 !== s1) {
+        const c0 = +s0.slice(1), c1 = +s1.slice(1);
+        const dist = Math.abs(c0 - c1);
+        if (dist >= 1 && dist <= MAX) {
+          place('T', c0, id, pins[0].id);
+          place('T', c1, id, pins[1].id);
+          placed = true;
+        }
+      }
+      // jedna nóżka do istniejącej kolumny, druga do najbliższej wolnej
       for (let i = 0; i < 2 && !placed; i++) {
-        const s = findNetStrip(netOf(id + ':' + pins[i].id), 'T');
+        const s = i === 0 ? s0 : s1;
         if (!s) continue;
         const c = +s.slice(1);
-        const other = i === 0 ? c + span : c - span;
-        const lo = Math.min(c, other), hi = Math.max(c, other);
-        let ok = other >= 1 && other <= COLS;
-        for (let x = lo; ok && x <= hi; x++) if (x !== c && owner.T[x]) ok = false;
-        if (!ok) continue;
-        for (let x = lo + 1; x < hi; x++) owner.T[x] = id;
+        const cand = [];
+        for (let dx = span; dx <= MAX; dx++) cand.push(i === 0 ? c + dx : c - dx, i === 0 ? c - dx : c + dx);
+        const other = cand.find((x) => x >= 1 && x <= COLS && !owner.T[x]);
+        if (other == null) continue;
         place('T', c, id, pins[i].id);
         place('T', other, id, pins[1 - i].id);
-        cursor.T = Math.max(cursor.T, hi + 1);
+        cursor.T = Math.max(cursor.T, other + 1);
         placed = true;
       }
       if (!placed) {
@@ -185,22 +200,29 @@ export function layoutBreadboard(project) {
       });
       return;
     }
-    // łańcuch kolumn tej samej sieci
-    for (let i = 1; i < strips.length; i++) {
-      const s0 = strips[i - 1], s1 = strips[i];
-      const h0 = takeRow(s0[0], +s0.slice(1), false);
-      const h1 = takeRow(s1[0], +s1.slice(1), false);
-      if (h0 && h1) jumpers.push({ a: { hole: h0 }, b: { hole: h1 }, color: col || 'grey' });
-    }
-    // kabel z płytki (Nano) do pierwszej kolumny sieci
-    if (strips.length) {
-      const s = strips[0];
-      bpins.forEach((pin) => {
-        const real = pin === 'GND' ? 'GND' : pin;
+    if (!strips.length) return;
+    strips.sort((a, b) => (a[0] === b[0] ? 0 : a[0] === 'T' ? -1 : 1) || +a.slice(1) - +b.slice(1));
+    // ile kolumn zasilić prosto z płytki: GND — tyle, ile płytka ma pinów GND; reszta przez mostki
+    const gndPins = board.rows.flat().filter((x) => x === 'GND').length;
+    const direct = role === 'GND' ? Math.min(gndPins, strips.length) : 1;
+    // wybierz najbardziej oddalone kolumny jako zasilane z płytki, resztę dopnij do najbliższej
+    const fed = role === 'GND' && direct > 1 ? [strips[0], strips[strips.length - 1]] : [strips[0]];
+    const wireColorFor = col || (role === 'GND' ? 'black' : role ? 'red' : 'blue');
+    fed.forEach((s, i) => {
+      const pins2 = role === 'GND' ? ['GND'] : bpins;
+      pins2.forEach((pin) => {
         const h = takeRow(s[0], +s.slice(1), false);
-        if (h) boardWires.push({ pin: real, to: { hole: h }, color: col || (role === 'GND' ? 'black' : role ? 'red' : 'blue') });
+        if (h) boardWires.push({ pin, to: { hole: h }, color: wireColorFor });
       });
-    }
+    });
+    const linked = new Set(fed);
+    strips.filter((s) => !linked.has(s)).forEach((s) => {
+      const near = [...linked].sort((a, b) => Math.abs(+a.slice(1) - +s.slice(1)) - Math.abs(+b.slice(1) - +s.slice(1)) || (a[0] === s[0] ? -1 : 1))[0];
+      const h0 = takeRow(near[0], +near.slice(1), false);
+      const h1 = takeRow(s[0], +s.slice(1), false);
+      if (h0 && h1) jumpers.push({ a: { hole: h0 }, b: { hole: h1 }, color: role === 'GND' ? 'black' : col || 'grey' });
+      linked.add(s);
+    });
   });
 
   // zasilanie szyn z płytki

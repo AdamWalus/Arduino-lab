@@ -117,16 +117,15 @@
     }
   ],
   "steps": [
-    "Odepnij USB. Nano leży obok płytki, łączysz kabelkami.",
+    "Odepnij USB. Nano leży obok płytki, łączysz kabelkami. Szyn +/− nie używamy.",
     "Czerwona: rezystor 220 Ω w **e2** i **e5**, dioda dłuższą nóżką w **d5**, krótszą w **e6**.",
     "Żółta: rezystor w **e7** i **e10**, dioda dłuższą w **d10**, krótszą w **e11**.",
     "Zielona: rezystor w **e12** i **e15**, dioda dłuższą w **d15**, krótszą w **e16**.",
     "Przycisk **nad środkowym rowkiem**: jedna nóżka w **e17**, ta po przekątnej w **f19**.",
     "Buzzer: **+** w **e21**, **−** w **e23**.",
-    "Czarne kabelki do **szyny − (góra)** z: **a6**, **a11**, **a16**, **a23**. Z **j19** do **szyny − (dół)**.",
-    "Mostek: czarny kabel **szyna − (góra) → szyna − (dół)**.",
-    "Z Nano: **D10 → a2**, **D11 → a7**, **D12 → a12**, **D2 → a17**, **D8 → a21**.",
-    "Z Nano: **GND → szyna − (góra)**.",
+    "GND z Nano: jeden pin **GND → a6**, drugi pin **GND → j19**.",
+    "Mostki GND (czarne): **b6 → a11**, **i19 → a16**, **h19 → a23**.",
+    "Sygnały z Nano: **D10 → a2**, **D11 → a7**, **D12 → a12**, **D2 → a17**, **D8 → a21**.",
     "Podłącz USB i wgraj kod. Kliknij przycisk."
   ],
   "explain": [
