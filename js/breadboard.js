@@ -180,6 +180,11 @@ export function layoutBreadboard(project) {
   };
   const nets = {};
   Object.keys(parent).forEach((k) => { const n = netOf(k); (nets[n] = nets[n] || new Set()).add(k); });
+  // do czego (na płytce MCU) prowadzi każda nóżka — do podpisów na przycisku itp.
+  legs.forEach((l) => {
+    const n = nets[netOf(l.part + ':' + l.pin)];
+    l.board = n ? [...n].filter((k) => k.startsWith('board:')).map((k) => k.slice(6)).join('/') : '';
+  });
   const railsUsed = new Set();
   const boardWires = [];
 
@@ -389,7 +394,11 @@ export function renderBreadboard(L) {
       const [a, c] = pts;
       const mx = (a.x + c.x) / 2;
       partSvg.push(`<circle class="buzz" cx="${mx}" cy="${a.y - 2}" r="13"/><circle cx="${mx}" cy="${a.y - 2}" r="3" class="buzz-h"/>`);
-      tags.push(`<text class="on-part sm" x="${mx}" y="${a.y + 0.5}" text-anchor="middle">buzzer</text>`);
+      tags.push(`<text class="on-part sm" x="${mx}" y="${a.y - 4}" text-anchor="middle">buzzer</text>`);
+      const pp = legXY[p.id + ':+'], pm = legXY[p.id + ':-'];
+      [pp, pm].filter(Boolean).forEach((q) => partSvg.push(`<rect class="btn-leg" x="${q.x - 2.5}" y="${q.y - 2.5}" width="5" height="5"/>`));
+      if (pp) tags.push(`<text class="on-part pm" x="${pp.x}" y="${a.y + 15}" text-anchor="middle">+</text>`);
+      if (pm) tags.push(`<text class="on-part pm" x="${pm.x}" y="${a.y + 15}" text-anchor="middle">−</text>`);
     } else if (p.type === 'button') {
       const c = p._btn;
       const x = cx(c) - 4;
@@ -398,6 +407,13 @@ export function renderBreadboard(L) {
       const h = rowY.f - rowY.e + 8;
       partSvg.push(`<rect class="btn-b" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/><circle class="btn-c" cx="${x + w / 2}" cy="${y + h / 2}" r="${Math.min(w, h) / 2 - 5}"/>`);
       tags.push(`<text class="on-part" x="${x + w / 2}" y="${y + h / 2 + 3}" text-anchor="middle">przycisk</text>`);
+      // 4 nóżki w rogach; użyte podpisane tym, dokąd idą
+      [[c, 'e'], [c + 2, 'e'], [c, 'f'], [c + 2, 'f']].forEach(([cc, r]) => partSvg.push(`<rect class="btn-leg" x="${cx(cc) - 2.5}" y="${rowY[r] - 2.5}" width="5" height="5"/>`));
+      L.legs.filter((l) => l.part === p.id && l.hole).forEach((l) => {
+        const pt = hxy({ hole: l.hole });
+        const top = l.half === 'T';
+        tags.push(`<text class="on-part sm pin-t" x="${pt.x}" y="${top ? pt.y + 9 : pt.y - 5}" text-anchor="middle">${esc(l.board || l.pin)}</text>`);
+      });
     } else {
       // moduł: korpus nad płytką, nóżki do rzędu a
       const c0 = p._mod;
