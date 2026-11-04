@@ -270,7 +270,9 @@ export function renderBreadboard(L) {
   const X0 = 40;
   const cols = L.maxCol;
   const W = X0 + cols * P + 30;
-  const top = 18 + (hasMod ? 84 : 22);
+  const nJ = L.jumpers.length;
+  const nB = L.boardWires.length;
+  const top = 18 + (hasMod ? 84 : 22) + nJ * 7;
   const yRail = { '+T': top + 8, '-T': top + 8 + P };
   const yA = top + (L.rails ? 2 * P + 22 : 14);
   const rowY = {};
@@ -287,9 +289,9 @@ export function renderBreadboard(L) {
   const b = L.board;
   const n = Math.max(...b.rows.map((r) => r.length));
   const mcuX = X0 + P;
-  const mcuY = bbBottom + 90;
+  const mcuY = bbBottom + 30 + nB * 8 + 16;
   const mcuW = n * P + 50;
-  const mcuH = 74;
+  const mcuH = 92;
   const pinXY = {};
   b.rows.forEach((row, r) => row.forEach((pin, i) => {
     const pt = { x: mcuX + 40 + i * P + P / 2, y: r === 0 ? mcuY + 14 : mcuY + mcuH - 14 };
@@ -382,7 +384,7 @@ export function renderBreadboard(L) {
       const bw = Math.max(x2 - x1, 80);
       const bx = x1 - (bw - (x2 - x1)) / 2;
       const by = 14;
-      const bh = top - 34;
+      const bh = 50;
       pts.forEach((pt) => partSvg.push(`<line class="leg" x1="${pt.x}" y1="${pt.y}" x2="${pt.x}" y2="${by + bh}"/>`));
       partSvg.push(`<rect class="mod" x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="5"/>`);
       partSvg.push(`<text class="mod-t" x="${bx + bw / 2}" y="${by + 14}" text-anchor="middle">${esc(shortName(p))}</text>`);
@@ -390,31 +392,38 @@ export function renderBreadboard(L) {
     }
   });
 
-  // kable
+  // kable — kąty proste, pionowe odcinki idą między kolumnami (dziurki i numery zostają widoczne)
   const wireSvg = [];
-  const arc = (a, b2, color, lift) => {
-    const dx = Math.abs(b2.x - a.x);
-    const h = lift ?? Math.min(60, 10 + dx * 0.25);
-    const my = Math.min(a.y, b2.y) - h;
-    const d = `M${a.x} ${a.y} C${a.x} ${my} ${b2.x} ${my} ${b2.x} ${b2.y}`;
+  const draw = (d, color, ends) => {
     const c = wireColor(color, '#2f6fe4');
     const white = c.toLowerCase() === '#f2f2f2';
     wireSvg.push(`<path class="j-case${white ? ' is-white' : ''}" d="${d}"/><path class="j" d="${d}" stroke="${c}"/>`);
-    [a, b2].forEach((pt) => wireSvg.push(`<rect class="j-end" x="${pt.x - 3}" y="${pt.y - 3}" width="6" height="6" fill="${c}"/>`));
+    ends.forEach((pt) => wireSvg.push(`<rect class="j-end" x="${pt.x - 3}" y="${pt.y - 3}" width="6" height="6" fill="${c}"/>`));
   };
-  L.jumpers.forEach((j) => arc(hxy(j.a), hxy(j.b), j.color, j.bridge ? 0 : undefined));
+  const chan = (x, i) => x + P / 2 + ((i % 3) - 1) * 2.4;
+  const laneTop0 = (L.rails ? yRail['+T'] - 16 : rowY.a - 20);
+  L.jumpers.forEach((j, i) => {
+    const a = hxy(j.a), c2 = hxy(j.b);
+    const ly = laneTop0 - i * 7;
+    const ax = chan(a.x, i), bx = chan(c2.x, i + 1);
+    draw(`M${a.x} ${a.y} H${ax} V${ly} H${bx} V${c2.y} H${c2.x}`, j.color, [a, c2]);
+  });
   const gndSeen = { n: 0 };
-  L.boardWires.forEach((w) => {
+  const bw = L.boardWires.map((w) => {
     let key = w.pin;
     if (w.pin === 'GND') key = gndSeen.n++ % 2 ? 'GND#2' : 'GND';
-    const a = pinXY[key] || pinXY[w.pin];
-    if (!a) return;
-    const t = hxy(w.to);
-    const c = wireColor(w.color, '#2f6fe4');
-    const white = c.toLowerCase() === '#f2f2f2';
-    const d = `M${a.x} ${a.y} C${a.x} ${a.y - 70} ${t.x} ${t.y + 90} ${t.x} ${t.y}`;
-    wireSvg.push(`<path class="j-case${white ? ' is-white' : ''}" d="${d}"/><path class="j" d="${d}" stroke="${c}"/>`);
-    wireSvg.push(`<rect class="j-end" x="${t.x - 3}" y="${t.y - 3}" width="6" height="6" fill="${c}"/><rect class="j-end" x="${a.x - 3.5}" y="${a.y - 3.5}" width="7" height="7" fill="${c}"/>`);
+    return { w, a: pinXY[key] || pinXY[w.pin], t: hxy(w.to) };
+  }).filter((x) => x.a);
+  // pasy pod płytką: kabel, który idzie dalej w prawo, bliżej płytki — mniej skrzyżowań
+  bw.sort((u, v) => (v.t.x - v.a.x) - (u.t.x - u.a.x));
+  bw.forEach(({ w, a, t }, i) => {
+    const ly = bbBottom + 14 + i * 8;
+    const tx = chan(t.x, i);
+    const isBottomRow = a.y > mcuY + mcuH / 2;
+    const sx = isBottomRow ? a.x + P / 2 : a.x;
+    const d = `M${a.x} ${a.y}${isBottomRow ? ` H${sx}` : ''} V${ly} H${tx} V${t.y} H${t.x}`;
+    draw(d, w.color, [t]);
+    wireSvg.push(`<rect class="j-end" x="${a.x - 3.5}" y="${a.y - 3.5}" width="7" height="7" fill="${wireColor(w.color, '#2f6fe4')}"/>`);
   });
   o.push(...partSvg, ...wireSvg, '</svg>');
   return o.join('');
