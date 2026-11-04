@@ -142,6 +142,40 @@ pre.code code { background: none; padding: 0; font-size: inherit; }
 .gallery figure { margin: 0; } .gallery img { width: 100%; border-radius: 10px; display: block; }
 .gallery figcaption { font-size: .8rem; color: var(--muted); margin-top: 4px; }
 
+/* płytka stykowa */
+.bb-wrap { background: var(--surface-2); border-radius: 10px; padding: 6px; }
+svg.bb { display: block; font-family: system-ui, sans-serif; }
+svg.bb .bb-body { fill: #f3f1ea; stroke: #d8d4c8; }
+svg.bb .bb-gap { fill: #e1ddd1; }
+svg.bb .bb-h { fill: #4a4a44; }
+svg.bb .bb-lab, svg.bb .bb-num { font-size: 9px; fill: #8a867a; font-weight: 600; }
+svg.bb .rail-p { stroke: #e5484d; stroke-width: 1.6; fill: #e5484d; }
+svg.bb .rail-n { stroke: #2f6fe4; stroke-width: 1.6; fill: #2f6fe4; }
+svg.bb text.bb-rl { stroke: none; font-size: 13px; font-weight: 800; }
+svg.bb .bb-mcu { fill: #1d4fa3; }
+svg.bb .bb-usb { fill: #b9c0c7; }
+svg.bb .bb-mcu-t { fill: #fff; opacity: .5; font-weight: 800; font-size: 13px; }
+svg.bb .bb-mpin { fill: #d0b45a; }
+svg.bb .bb-mlab { font-size: 7.5px; fill: #c9d6ee; font-family: ui-monospace, monospace; }
+svg.bb .bb-mlab.on { fill: #fff; font-weight: 800; font-size: 8.5px; }
+svg.bb .leg { stroke: #9aa3ab; stroke-width: 1.8; }
+svg.bb .leg-t { font-size: 9px; font-weight: 800; fill: #333; }
+svg.bb .leg-t.w { fill: #fff; }
+svg.bb .res { fill: #e3c9a0; stroke: #b99b6c; }
+svg.bb .ledb { stroke: rgba(0,0,0,.35); }
+svg.bb .ldr { fill: #e6a15a; stroke: #9c6a33; } svg.bb .ldr-z { fill: none; stroke: #7a3d10; stroke-width: 1.2; }
+svg.bb .buzz { fill: #1d1f22; } svg.bb .buzz-h { fill: #555; }
+svg.bb .btn-b { fill: #2a2d31; } svg.bb .btn-c { fill: #3c8f5a; }
+svg.bb .mod { fill: #1f3d7a; stroke: #12294f; }
+svg.bb .mod-t { fill: #fff; font-size: 11px; font-weight: 700; }
+svg.bb .mod-p { fill: #dbe6ff; font-size: 8px; font-family: ui-monospace, monospace; font-weight: 700; }
+svg.bb .j { fill: none; stroke-width: 3.2; stroke-linecap: round; }
+svg.bb .j-case { fill: none; stroke: rgba(0,0,0,.35); stroke-width: 5; stroke-linecap: round; }
+svg.bb .j-case.is-white { stroke: #6e7781; }
+svg.bb .j-end { stroke: rgba(0,0,0,.5); stroke-width: 1; }
+.bb-list summary { cursor: pointer; font-weight: 600; margin-top: 8px; }
+.lab-bb { margin-bottom: 10px; }
+
 /* zoom */
 .zoom { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column; }
 .zoom-bar { display: flex; gap: 8px; justify-content: flex-end; padding: 10px; padding-top: calc(10px + env(safe-area-inset-top)); border-bottom: 1px solid var(--line); }

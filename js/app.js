@@ -3,6 +3,7 @@ import { PARTS, partTitle, partDef } from './parts.js';
 import { analyze } from './check.js';
 import { renderDiagram, renderBoard, connectionRows, usedBoardPins } from './diagram.js';
 import { toWokwi } from './wokwi.js';
+import { layoutBreadboard, renderBreadboard, breadboardSteps } from './breadboard.js';
 import { renderReport } from './report.js';
 import { esc, md, highlight, copy, toast, store, getJSON, getText, sha256, fmtDate } from './util.js';
 
@@ -120,8 +121,9 @@ async function projectView(slug) {
   const chk = analyze(p, inv);
   const rows = connectionRows(p);
   const wk = toWokwi(p);
-  const labDone = store.get('lab:' + slug, []).length;
-  const stepsN = (p.steps || []).length;
+  const labDone = store.get('lab2:' + slug, []).length;
+  const Lb = layoutBreadboard(p);
+  const stepsN = Lb ? breadboardSteps(Lb).length + 2 : (p.steps || []).length;
 
   view.innerHTML = `
     <a class="back" href="#/">← Projekty</a>
@@ -144,6 +146,8 @@ async function projectView(slug) {
       <div class="scroll diagram-wrap">${renderDiagram(p)}</div>
     </section>
 
+    ${bbSection(p)}
+
     <section class="card">
       <h2>Które piny na płytce</h2>
       <div class="scroll">${renderBoard(p.board, usedBoardPins(p))}</div>
@@ -158,7 +162,7 @@ async function projectView(slug) {
       </table></div>
     </section>
 
-    ${stepsN ? `<section class="card"><div class="card-h"><h2>Jak złożyć w realu</h2><a class="btn small" href="#/lab/${slug}">Tryb lab</a></div>
+    ${(p.steps || []).length ? `<section class="card"><div class="card-h"><h2>Jak złożyć w realu</h2><a class="btn small" href="#/lab/${slug}">Tryb lab</a></div>
       <ol class="steps">${p.steps.map((s) => `<li>${md(s)}</li>`).join('')}</ol>
       <p class="safety">USB odpięte przy podłączaniu · dioda zawsze z rezystorem · 5V nigdy z GND</p></section>` : ''}
 
@@ -194,7 +198,22 @@ async function projectView(slug) {
   if (sb) sb.addEventListener('click', () => copy(location.origin + location.pathname + '#' + p.n));
   view.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b.dataset.copy === 'code' ? p.code || '' : JSON.stringify(wk.diagram, null, 2))));
   view.querySelector('[data-zoom]').addEventListener('click', () => zoom(renderDiagram(p)));
+  const zb = view.querySelector('[data-zoom-bb]');
+  if (zb) zb.addEventListener('click', () => zoom(renderBreadboard(layoutBreadboard(p))));
   view.querySelector('[data-jump]').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('wokwi').scrollIntoView({ behavior: 'smooth' }); });
+}
+
+function bbSection(p) {
+  const L = layoutBreadboard(p);
+  if (!L) return '';
+  const steps = breadboardSteps(L);
+  return `<section class="card">
+      <div class="card-h"><h2>Na płytce stykowej</h2><button class="btn small" data-zoom-bb>Powiększ</button></div>
+      <p class="hint">Tak to wpiąć w realu. Dziurki: litera = rząd, liczba = kolumna (np. <b>e12</b>). ${L.rails ? 'Szyny: + czerwona, − niebieska.' : ''}</p>
+      <div class="scroll bb-wrap">${renderBreadboard(L)}</div>
+      <details class="bb-list" open><summary>Co gdzie wpiąć (${steps.length})</summary><ol class="steps">${steps.map((s) => `<li>${md(s)}</li>`).join('')}</ol></details>
+      ${L.notes.length ? `<p class="hint warn-t">${L.notes.map(esc).join(' ')}</p>` : ''}
+    </section>`;
 }
 
 function checkPanel(chk) {
@@ -231,17 +250,20 @@ function zoom(svg) {
 async function labView(slug) {
   const p = await loadProject(slug);
   const board = getBoard(p.board);
-  const steps = p.steps || [];
-  const done = new Set(store.get('lab:' + slug, []));
+  const L = layoutBreadboard(p);
+  const steps = L ? [...breadboardSteps(L), `Sprawdź jeszcze raz: nic nie zwiera 5V z GND, dioda ma rezystor.`, `Podłącz USB i wgraj kod (${board ? esc(board.ide) : ''}).`] : p.steps || [];
+  const done = new Set(store.get('lab2:' + slug, []));
   const rows = connectionRows(p);
   view.innerHTML = `
     <a class="back" href="#/p/${slug}">← ${esc(p.title)}</a>
     <h1 class="lab-title">Tryb lab</h1>
     <div class="progress"><div class="bar"></div><span class="ptext"></span></div>
     <p class="safety">Najpierw odepnij USB. Podłączasz na końcu.</p>
+    ${L ? `<div class="scroll bb-wrap lab-bb">${renderBreadboard(L)}</div>` : ''}
     <ol class="lab-steps">${steps.map((s, i) => `<li><label><input type="checkbox" data-i="${i}" ${done.has(i) ? 'checked' : ''}><span>${md(s)}</span></label></li>`).join('')}</ol>
     <div class="lab-actions"><button class="btn" data-reset>Od nowa</button><a class="btn primary" href="#/p/${slug}">Gotowe</a></div>
-    <details class="card" open><summary><h2>Piny na płytce</h2></summary><div class="scroll">${renderBoard(p.board, usedBoardPins(p))}</div></details>
+    ${L && (p.steps || []).length ? `<details class="card"><summary><h2>Opis krok po kroku</h2></summary><ol class="steps">${p.steps.map((s) => `<li>${md(s)}</li>`).join('')}</ol></details>` : ''}
+    <details class="card"><summary><h2>Piny na płytce</h2></summary><div class="scroll">${renderBoard(p.board, usedBoardPins(p))}</div></details>
     <details class="card"><summary><h2>Połączenia</h2></summary>
       <table class="conn">${rows.map((r) => `<tr><td><span class="sw" style="background:${r.color}"></span></td><td>${esc(r.from)}${r.boardPin && board ? `<div class="loc">${esc(pinLocation(board, r.boardPin))}</div>` : ''}</td><td>${esc(r.to)}</td></tr>`).join('')}</table>
     </details>
@@ -255,12 +277,12 @@ async function labView(slug) {
   view.querySelectorAll('input[type=checkbox]').forEach((c) => c.addEventListener('change', () => {
     const i = +c.dataset.i;
     c.checked ? done.add(i) : done.delete(i);
-    store.set('lab:' + slug, [...done]);
+    store.set('lab2:' + slug, [...done]);
     upd();
   }));
   view.querySelector('[data-reset]').addEventListener('click', () => {
     done.clear();
-    store.del('lab:' + slug);
+    store.del('lab2:' + slug);
     view.querySelectorAll('input[type=checkbox]').forEach((c) => (c.checked = false));
     upd();
   });

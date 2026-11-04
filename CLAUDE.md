@@ -76,6 +76,14 @@ Jeśli nie da się wypchnąć (brak dostępu), powiedz to wprost i daj kod/instr
 - Kolory kabli: red, black, blue, green, yellow, orange, white, grey, purple, brown, limegreen, gold, cyan, pink. GND = black, 5V = red.
 - Kroki (`steps`) piszesz pod **prawdziwą płytkę stykową**: kolumny, szyny, który pin GND — tak, żeby dało się to złożyć bez myślenia. Każdy kabel w osobnej dziurce.
 
+## Widok płytki stykowej
+
+Strona sama rozmieszcza części na płytce stykowej (`js/breadboard.js`) i generuje listę „co gdzie wpiąć” (dziurki typu `e12`, szyny +/−). Tryb lab odhacza właśnie tę listę. Nano/ESP leży obok płytki i łączy się kabelkami (tak jak na labach).
+
+- Domyślnie duża płytka z szynami (63 kolumny). Mała bez szyn: `"breadboard": "mini"`. Bez widoku: `"breadboard": false`.
+- Podgląd w terminalu: `node scripts/bb.mjs <slug>` — jak piszesz `steps` z numerami dziurek, bierz je stąd, żeby zgadzały się z obrazkiem.
+- Zawsze są **dwa schematy**: logiczny (szyny 5V/GND, `js/diagram.js`) i płytka stykowa.
+
 ## Sprawozdanie (`report`)
 
 Strona `#/raport/<slug>` robi PDF (strona tytułowa UBB + sekcje). Dane studenta są w `data/settings.json`.
@@ -100,6 +108,6 @@ Styl sprawozdań: **luźny język studenta**, pierwsza osoba („podłączyłem�
 
 - `index.html`, `css/app.css`, `js/*.js` — aplikacja (bez builda, czyste moduły ES).
 - `js/check.js` — kontrola bezpieczeństwa (używana i w przeglądarce, i w `scripts/check.mjs`, i w CI).
-- `js/diagram.js` — rysowanie schematu; `js/wokwi.js` — eksport do Wokwi; `js/report.js` — sprawozdanie.
+- `js/diagram.js` — schemat logiczny; `js/breadboard.js` — płytka stykowa; `js/wokwi.js` — eksport do Wokwi; `js/report.js` — sprawozdanie.
 - `.github/workflows/pages.yml` — check + deploy na Pages.
 - Po zmianie plików aplikacji podbij wersję cache w `sw.js` (`const V = 'al-vN'`).
