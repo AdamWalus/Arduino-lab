@@ -1,0 +1,78 @@
+{
+  "slug": "2026-11-04-dioda-przycisk-uno",
+  "title": "Dioda na przycisk (Uno)",
+  "date": "2026-11-04",
+  "board": "uno",
+  "summary": "Przycisk na D2 z INPUT_PULLUP, dioda na D13 świeci, gdy wciskasz — na Arduino Uno.",
+  "tags": [
+    "przycisk",
+    "digitalRead",
+    "led",
+    "uno"
+  ],
+  "parts": [
+    {
+      "id": "btn",
+      "type": "button"
+    },
+    {
+      "id": "r1",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "led1",
+      "type": "led",
+      "color": "red"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:D2",
+      "to": "btn:1",
+      "color": "blue"
+    },
+    {
+      "from": "btn:2",
+      "to": "board:GND",
+      "color": "black",
+      "note": "nóżka po przekątnej"
+    },
+    {
+      "from": "board:D13",
+      "to": "r1:1",
+      "color": "orange"
+    },
+    {
+      "from": "r1:2",
+      "to": "led1:A"
+    },
+    {
+      "from": "led1:C",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "USB odpięte. Uno leży obok płytki.",
+    "Przycisk **nad środkowym rowkiem**: nóżki w **e2** i **f4** (po przekątnej, druga para też siedzi, ale jej nie używamy).",
+    "Rezystor **220 Ω**: nóżki w **e6** i **e9**.",
+    "Dioda: dłuższa nóżka (+) w **d9** (ta sama kolumna co rezystor), krótsza (−) w **e10**.",
+    "Kabel niebieski: **D2** → **a2**.",
+    "Kabel pomarańczowy: **D13** → **a6**.",
+    "Kabel czarny: **GND** → **a10** (dioda).",
+    "Kabel czarny: drugi **GND** → **j4** (przycisk). Uno ma 3 piny GND, więc każdy dostaje swój.",
+    "Na końcu USB, płytka **Arduino Uno** w IDE, wgraj kod, wciśnij przycisk."
+  ],
+  "explain": [
+    "`INPUT_PULLUP` robi z D2 wejście, które normalnie czyta HIGH. Wciśnięty przycisk łączy D2 z GND, więc pin czyta LOW — dlatego **LOW = wciśnięty**.",
+    "Przycisk to mostek: puszczony rozłącza nóżki z dwóch stron, wciśnięty łączy."
+  ],
+  "expected": "Trzymasz przycisk — dioda świeci. Puszczasz — gaśnie.",
+  "troubleshooting": [
+    "Świeci cały czas — nóżki przycisku w tej samej kolumnie płytki albo wzięte z jednej strony mostka. Przełóż przycisk nad rowek, weź nóżki po przekątnej."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 8
+}

@@ -121,5 +121,24 @@
       "Przycisk (tact switch)",
       "Buzzer"
     ]
+  },
+  {
+    "n": 8,
+    "slug": "2026-11-04-dioda-przycisk-uno",
+    "title": "Dioda na przycisk (Uno)",
+    "board": "uno",
+    "date": "2026-11-04",
+    "summary": "Przycisk na D2 z INPUT_PULLUP, dioda na D13 świeci, gdy wciskasz — na Arduino Uno.",
+    "tags": [
+      "przycisk",
+      "digitalRead",
+      "led",
+      "uno"
+    ],
+    "status": "warn",
+    "missing": [
+      "Arduino Uno",
+      "Przycisk (tact switch)"
+    ]
   }
 ]
