@@ -58,6 +58,7 @@ const routes = [
 async function route() {
   const h = location.hash || '#/';
   document.body.classList.toggle('is-report', h.startsWith('#/raport/'));
+  document.title = 'Arduino Lab';
   for (const [re, fn] of routes) {
     const m = h.match(re);
     if (m) {
@@ -65,7 +66,8 @@ async function route() {
       try {
         await fn(...m.slice(1));
       } catch (e) {
-        view.innerHTML = `<section class="card error-card"><h2>Nie udało się</h2><p>${esc(e.message)}</p><a class="btn" href="#/">Wróć</a></section>`;
+        const msg = /project\.json: 404/.test(e.message) ? 'Nie ma takiego projektu.' : e.message;
+        view.innerHTML = `<section class="card error-card"><h2>Nie udało się</h2><p>${esc(msg)}</p><a class="btn" href="#/">Wróć do projektów</a></section>`;
       }
       setActiveNav(h);
       window.scrollTo(0, 0);
@@ -181,7 +183,7 @@ async function projectView(slug) {
 
     <section class="card" id="wokwi">
       <h2>Wokwi (symulacja)</h2>
-      ${wk.diagram ? `
+      ${wk.diagram && wk.broken ? `<p class="hint warn-t">Ten projekt nie zasymuluje się w Wokwi: ${wk.skipped.map(esc).join('; ')}. Rób od razu w realu.</p>` : wk.diagram ? `
         <ol class="steps compact">
           <li>Otwórz <a href="${wk.url}" target="_blank" rel="noopener">nowy projekt w Wokwi</a>.</li>
           <li>Zakładka <code>diagram.json</code> → zaznacz wszystko → wklej: <button class="btn small" data-copy="wokwi">Kopiuj diagram.json</button></li>
@@ -230,18 +232,20 @@ function checkPanel(chk) {
 function zoom(svg) {
   const ov = document.createElement('div');
   ov.className = 'zoom';
-  ov.innerHTML = `<div class="zoom-bar"><button class="btn small" data-z="-">−</button><button class="btn small" data-z="+">+</button><button class="btn small" data-z="x">Zamknij</button></div><div class="zoom-body">${svg}</div>`;
+  ov.innerHTML = `<div class="zoom-bar"><button class="btn small" data-z="-">−</button><button class="btn small" data-z="+">+</button><button class="btn small" data-z="f">Dopasuj</button><button class="btn small" data-z="x">Zamknij</button></div><div class="zoom-body">${svg}</div>`;
   document.body.appendChild(ov);
   const el = ov.querySelector('svg');
   const w0 = +el.getAttribute('width');
   const h0 = +el.getAttribute('height');
-  let s = Math.min(1.4, (window.innerWidth - 16) / w0 > 1 ? 1.4 : 1);
+  const fit = () => Math.min(1.6, (window.innerWidth - 24) / w0);
+  let s = fit();
   const apply = () => { el.setAttribute('width', w0 * s); el.setAttribute('height', h0 * s); };
   apply();
   ov.addEventListener('click', (e) => {
     const z = e.target.dataset.z;
     if (z === '+') s = Math.min(4, s * 1.3);
     if (z === '-') s = Math.max(0.3, s / 1.3);
+    if (z === 'f') s = fit();
     if (z === 'x') { ov.remove(); return; }
     apply();
   });
@@ -298,7 +302,7 @@ async function reportView(slug) {
       <span class="hint">Tekst możesz poprawić palcem przed zapisem. W oknie drukowania wybierz „Zapisz jako PDF”.</span>
     </div>
     <div class="report">${renderReport(p, s)}</div>`;
-  view.querySelector('[data-print]').addEventListener('click', () => window.print());
+  view.querySelector('[data-print]').addEventListener('click', () => { if (document.activeElement) document.activeElement.blur(); window.print(); });
   document.title = `Sprawozdanie – ${p.title}`;
 }
 
@@ -394,7 +398,7 @@ async function newTaskView() {
     d.report ? 'Dodaj też sekcję report (sprawozdanie).' : '',
     'Sprawdź `node scripts/check.mjs`, wypchnij na main i daj mi link do projektu.',
   ].filter(Boolean).join('\n');
-  f.querySelector('[data-go]').addEventListener('click', async () => { await copy(prompt(read())); window.open('https://claude.ai/code', '_blank'); });
+  f.querySelector('[data-go]').addEventListener('click', () => { const text = prompt(read()); window.open('https://claude.ai/code', '_blank'); copy(text); });
   f.querySelector('[data-only]').addEventListener('click', () => copy(prompt(read())));
 }
 
@@ -449,8 +453,9 @@ async function gate() {
           ov.remove();
           resolve();
         } else {
+          code = '';
           ov.querySelector('.dots').classList.add('shake');
-          setTimeout(() => { ov.querySelector('.dots').classList.remove('shake'); code = ''; show(); }, 400);
+          setTimeout(() => { ov.querySelector('.dots').classList.remove('shake'); show(); }, 400);
         }
       }
     };

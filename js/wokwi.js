@@ -6,6 +6,7 @@ import { normWires, parseEnd } from './check.js';
 export function toWokwi(project) {
   const board = getBoard(project.board);
   const skipped = [];
+  let broken = false;
   if (!board || !board.wokwi) {
     return { diagram: null, skipped: [`Wokwi nie obsługuje płytki ${board ? board.name : project.board}.`], url: null };
   }
@@ -17,8 +18,10 @@ export function toWokwi(project) {
     const def = PARTS[p.type];
     if (!def || !def.wokwi) {
       skipped.push(`${p.id} (${def ? def.name : p.type}) — nie ma w Wokwi, pominięte`);
+      if (p.type !== 'resistor') broken = true;
       return;
     }
+    if (def.wokwi.note) skipped.push(`${p.id}: ${def.wokwi.note}`);
     const col = i % 3;
     const row = Math.floor(i / 3);
     i++;
@@ -47,6 +50,7 @@ export function toWokwi(project) {
   return {
     diagram: { version: 1, author: 'arduino-lab', editor: 'wokwi', parts, connections: conn, dependencies: {} },
     skipped,
+    broken,
     url: W.newUrl,
   };
 }

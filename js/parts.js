@@ -53,7 +53,7 @@ export const PARTS = {
   },
   'ldr-module': {
     name: 'Moduł fotorezystora',
-    pins: [P('VCC', 'vcc'), P('GND', 'gnd'), P('DO', 'signal', 'DO (cyfrowe)'), P('AO', 'analog', 'AO (analog)')],
+    pins: [P('VCC', 'vcc'), P('GND', 'gnd'), P('DO', 'out', 'DO (cyfrowe)'), P('AO', 'analog', 'AO (analog)')],
     vcc: [3.3, 5],
     desc: 'Fotorezystor z gotowym rezystorem na płytce. AO → pin analogowy, DO = tak/nie (próg pokrętłem).',
     tips: ['Ciemno = duża liczba, jasno = mała.'],
@@ -62,7 +62,7 @@ export const PARTS = {
   },
   'hc-sr04': {
     name: 'Czujnik odległości HC-SR04',
-    pins: [P('VCC', 'vcc'), P('TRIG', 'signal'), P('ECHO', 'signal'), P('GND', 'gnd')],
+    pins: [P('VCC', 'vcc'), P('TRIG', 'signal'), P('ECHO', 'out'), P('GND', 'gnd')],
     vcc: [5, 5],
     desc: 'TRIG: Arduino każe „krzyknąć” ultradźwiękiem. ECHO: czas powrotu echa. cm = czas_us / 58.',
     tips: ['Zasilanie 5V.', 'Na ESP32/ESP8266 ECHO daje 5V — dzielnik napięcia albo wersja HC-SR04P.'],
@@ -82,7 +82,7 @@ export const PARTS = {
     vcc: [3.3, 5],
     desc: 'Temperatura i wilgotność. Biblioteka: DHT sensor library (Adafruit).',
     tips: ['Odczyt najwyżej co 1–2 s.'],
-    wokwi: { type: 'wokwi-dht22', pins: { VCC: 'VCC', DATA: 'SDA', GND: 'GND' } },
+    wokwi: { type: 'wokwi-dht22', pins: { VCC: 'VCC', DATA: 'SDA', GND: 'GND' }, note: 'w Wokwi jako DHT22 — w kodzie ustaw DHT22' },
   },
   dht22: {
     name: 'Czujnik DHT22',
@@ -137,7 +137,7 @@ export const PARTS = {
   },
   pir: {
     name: 'Czujnik ruchu PIR HC-SR501',
-    pins: [P('VCC', 'vcc'), P('OUT', 'signal'), P('GND', 'gnd')],
+    pins: [P('VCC', 'vcc'), P('OUT', 'out'), P('GND', 'gnd')],
     vcc: [5, 12],
     desc: 'HIGH, gdy wykryje ruch. Pokrętła: czułość i czas.',
     wokwi: { type: 'wokwi-pir-motion-sensor', pins: { VCC: 'VCC', OUT: 'OUT', GND: 'GND' } },

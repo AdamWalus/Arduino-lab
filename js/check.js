@@ -64,7 +64,8 @@ export function analyze(project, inventory) {
           errors.push(`Kabel ${wi + 1}: nie ma części o id „${E.id}”.`);
           ok = false;
         } else if (!partDef(p).pins.some((x) => x.id === E.pin)) {
-          errors.push(`Kabel ${wi + 1}: ${partTitle(p)} nie ma pinu „${E.pin}” (są: ${partDef(p).pins.map((x) => x.id).join(', ')}).`);
+          const ps = partDef(p).pins.map((x) => x.id);
+          errors.push(ps.length ? `Kabel ${wi + 1}: ${partTitle(p)} nie ma pinu „${E.pin}” (są: ${ps.join(', ')}).` : `Kabel ${wi + 1}: „${partTitle(p)}” nie ma zdefiniowanych pinów — dodaj w części pole "pins".`);
           ok = false;
         }
       }
@@ -163,7 +164,15 @@ export function analyze(project, inventory) {
       const na = pinNets[a];
       const nc = pinNets[c];
       if (!na && !nc) return;
-      const hasRes = [na, nc].some((n) => netHas(n, (k) => byId[k.split(':')[0]] && byId[k.split(':')[0]].type === 'resistor'));
+      // prawdziwy rezystor w szeregu: jedna nóżka w sieci diody, druga w INNEJ sieci
+      const resIn = (n) => n && [...n].some((k) => {
+        const [rid, rp] = k.split(':');
+        const r = byId[rid];
+        if (!r || r.type !== 'resistor') return false;
+        const other = netOf(rid + ':' + (rp === '1' ? '2' : '1'));
+        return other && other !== n;
+      });
+      const hasRes = resIn(na) || resIn(nc);
       if (!hasRes) errors.push(`„${title}”${p.type === 'rgb-led' ? ' (' + a + ')' : ''} bez rezystora — spalisz diodę albo pin. Dodaj 220 Ω.`);
       if (netHas(na, isGnd) || netHas(nc, (k) => !!supplyOf(k))) warnings.push(`„${title}” wygląda na odwrotnie wpiętą (A ma iść w stronę pinu/plusa, C do GND).`);
     });
@@ -177,9 +186,44 @@ export function analyze(project, inventory) {
     // Logika 5V na płytce 3.3V
     if (board.logic < 5 && d.vcc && d.vcc[0] >= 5) {
       d.pins
-        .filter((x) => x.role === 'signal' && pinNets[x.id] && netHas(pinNets[x.id], (k) => k.startsWith('board:')))
-        .forEach((x) => warnings.push(`„${title}”: ${x.id} może podawać 5V na pin ${board.short} (3,3V). Daj dzielnik napięcia.`));
+        .filter((x) => x.role === 'out' && pinNets[x.id] && netHas(pinNets[x.id], (k) => k.startsWith('board:')))
+        .forEach((x) => warnings.push(`„${title}”: ${x.id} podaje 5V na pin ${board.short} (3,3V). Daj dzielnik napięcia (np. 1 kΩ + 2 kΩ).`));
     }
+  });
+
+  // 2b. Przycisk między zasilaniem a GND = zwarcie po wciśnięciu
+  parts.filter((p) => p.type === 'button').forEach((p) => {
+    const n1 = netOf(p.id + ':1'), n2 = netOf(p.id + ':2');
+    const sup = (n) => netHas(n, (k) => !!supplyOf(k));
+    const gnd = (n) => netHas(n, isGnd);
+    if ((sup(n1) && gnd(n2)) || (sup(n2) && gnd(n1))) errors.push(`„${partTitle(p)}” łączy zasilanie z GND — po wciśnięciu będzie ZWARCIE. Jedna nóżka do pinu (INPUT_PULLUP), druga do GND.`);
+  });
+  // 2c. Pin sygnałowy prosto na zasilanie/GND
+  Object.values(nets).forEach((net) => {
+    const sig = [...net].filter((k) => k.startsWith('board:') && pinRole(board, k.slice(6)) === 'signal').map((k) => k.slice(6));
+    const s = [...net].map(supplyOf).find(Boolean);
+    const g = netHas(net, isGnd);
+    if (sig.length && (s || g)) warnings.push(`${sig.join(', ')} jest połączony prosto z ${s || 'GND'}. Jako OUTPUT to zwarcie — tylko jako wejście.`);
+  });
+  // 2d. RGB ze wspólnym rezystorem na COM
+  parts.filter((p) => p.type === 'rgb-led').forEach((p) => {
+    const com = netOf(p.id + ':COM');
+    const res = com && [...com].some((k) => (byId[k.split(':')[0]] || {}).type === 'resistor');
+    if (res) warnings.push(`„${partTitle(p)}”: jeden rezystor na COM — kolory będą świecić nierówno. Daj osobny rezystor na R, G i B.`);
+  });
+  // 2e. Wyjścia na pinach tylko-wejściowych
+  const inOnly = [...(board.inputOnly || []), ...(board.analogOnly || [])];
+  parts.forEach((p) => {
+    const d = partDef(p);
+    d.pins.forEach((x) => {
+      const net = netOf(p.id + ':' + x.id);
+      if (!net) return;
+      [...net].filter((k) => k.startsWith('board:') && inOnly.includes(k.slice(6))).forEach((k) => {
+        const pin = k.slice(6);
+        if (['led', 'rgb-led', 'buzzer', 'servo', 'relay', 'resistor'].includes(p.type) || (p.type === 'hc-sr04' && x.id === 'TRIG')) errors.push(`${pin} w ${board.short} jest tylko wejściem — „${partTitle(p)}” nie zadziała. Weź inny pin.`);
+        else if (p.type === 'button' && (board.analogOnly || []).includes(pin)) warnings.push(`${pin} nie ma INPUT_PULLUP — przycisk tu wymaga rezystora 10 kΩ do 5V albo innego pinu.`);
+      });
+    });
   });
 
   // 3. Piny płytki
@@ -194,7 +238,7 @@ export function analyze(project, inventory) {
     if (board.serial.includes(pin)) warnings.push(`${pin} to pin od USB/Serial — może przeszkadzać przy wgrywaniu. Weź inny.`);
     if (board.strapping && board.strapping.includes(pin)) infos.push(`${pin} w ${board.short} wpływa na start płytki — jak nie chce się wgrać, odepnij go.`);
     const physical = board.gnd.includes(pin) ? board.rows.flat().filter((x) => x === 'GND').length : 1;
-    if (n > physical) infos.push(`Do ${pin} idzie ${n} kabli, a na płytce ${physical === 1 ? 'jest jeden taki pin' : 'są ' + physical + ' takie piny'} — w realu wyprowadź ${pin} na kolumnę/szynę płytki stykowej i stamtąd rozdziel.`);
+    if (n > physical) infos.push(`Do ${pin} idzie ${n} ${n < 5 ? 'kable' : 'kabli'}, a na płytce ${physical === 1 ? 'jest jeden taki pin' : 'są ' + physical + ' takie piny'} — w realu wyprowadź ${pin} na kolumnę/szynę płytki stykowej i stamtąd rozdziel.`);
   });
 
   // 4. Magazyn

@@ -30,6 +30,7 @@ export const BOARDS = {
         if (p === '3V3') return '3.3V';
         if (p === 'RX0') return '0';
         if (p === 'TX1') return '1';
+        if (p === 'RST') return 'RESET';
         if (/^D\d+$/.test(p)) return p.slice(1);
         return p;
       },
@@ -54,12 +55,13 @@ export const BOARDS = {
     i2c: { SDA: 'A4', SCL: 'A5' },
     spi: { MOSI: 'D11', MISO: 'D12', SCK: 'D13' },
     serial: ['RX0', 'TX1'],
-    aliases: { D0: 'RX0', D1: 'TX1', RX: 'RX0', TX: 'TX1', '3.3V': '3V3' },
+    aliases: { D0: 'RX0', D1: 'TX1', RX: 'RX0', TX: 'TX1', '3.3V': '3V3', SDA: 'A4', SCL: 'A5' },
     wokwi: {
       type: 'wokwi-arduino-uno',
       newUrl: 'https://wokwi.com/projects/new/arduino-uno',
       pin: (p, gndIdx) => {
         if (p === 'GND') return 'GND.' + (1 + (gndIdx % 3));
+        if (p === 'RST') return 'RESET';
         if (p === '3V3') return '3.3V';
         if (p === 'RX0') return '0';
         if (p === 'TX1') return '1';
@@ -75,10 +77,10 @@ export const BOARDS = {
     logic: 3.3,
     ide: 'Płytka: ESP32 Dev Module (najpierw dodaj ESP32 w Menedżerze płytek)',
     rows: [
-      ['EN', 'VP', 'VN', 'D34', 'D35', 'D32', 'D33', 'D25', 'D26', 'D27', 'D14', 'D12', 'GND', 'D13', 'VIN'],
-      ['D23', 'D22', 'TX0', 'RX0', 'D21', 'D19', 'D18', 'D5', 'TX2', 'RX2', 'D4', 'D2', 'D15', 'GND', '3V3'],
+      ['VIN', 'GND', 'D13', 'D12', 'D14', 'D27', 'D26', 'D25', 'D33', 'D32', 'D35', 'D34', 'VN', 'VP', 'EN'],
+      ['3V3', 'GND', 'D15', 'D2', 'D4', 'RX2', 'TX2', 'D5', 'D18', 'D19', 'D21', 'RX0', 'TX0', 'D22', 'D23'],
     ],
-    rowNames: ['rząd z EN i VIN', 'rząd z D23 i 3V3'],
+    rowNames: ['rząd z VIN i EN', 'rząd z 3V3 i D23'],
     supplies: { '3V3': ['3V3'], VIN: ['VIN'] },
     gnd: ['GND'],
     analog: ['VP', 'VN', 'D34', 'D35', 'D32', 'D33', 'D25', 'D26', 'D27', 'D14', 'D12', 'D13', 'D4', 'D2', 'D15'],
@@ -109,10 +111,10 @@ export const BOARDS = {
     logic: 3.3,
     ide: 'Płytka: NodeMCU 1.0 (ESP-12E Module) (najpierw dodaj ESP8266 w Menedżerze płytek)',
     rows: [
-      ['A0', 'RSV', 'RSV', 'SD3', 'SD2', 'SD1', 'CMD', 'SD0', 'CLK', 'GND', '3V3', 'EN', 'RST', 'GND', 'VIN'],
-      ['D0', 'D1', 'D2', 'D3', 'D4', '3V3', 'GND', 'D5', 'D6', 'D7', 'D8', 'RX', 'TX', 'GND', '3V3'],
+      ['VIN', 'GND', 'RST', 'EN', '3V3', 'GND', 'CLK', 'SD0', 'CMD', 'SD1', 'SD2', 'SD3', 'RSV', 'RSV', 'A0'],
+      ['3V3', 'GND', 'TX', 'RX', 'D8', 'D7', 'D6', 'D5', 'GND', '3V3', 'D4', 'D3', 'D2', 'D1', 'D0'],
     ],
-    rowNames: ['rząd z A0 i VIN', 'rząd z D0–D8'],
+    rowNames: ['rząd z VIN i A0', 'rząd z D0–D8'],
     supplies: { '3V3': ['3V3'], VIN: ['VIN'] },
     gnd: ['GND'],
     analog: ['A0'],

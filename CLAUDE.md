@@ -21,7 +21,11 @@ Wejście chronione PIN-em 3078 (tylko kosmetycznie — repo jest publiczne).
 2. Uruchom `node scripts/check.mjs`. Nadaje projektowi numer `n` i przebudowuje `projects/index.json`.
    **Jak są błędy — popraw. Nie wypychaj z błędami.** Uwagi (żółte) przeczytaj i oceń.
 3. Commit + push na `main`.
-4. Odpowiedz **krótkim linkiem**: `https://adamwalus.github.io/Arduino-lab/#N` (N = numer projektu) plus 1–2 zdania. Nie wklejaj całego kodu do czatu, chyba że prosi.
+4. Odpowiedź w czacie, zawsze w tym układzie:
+   - **Na początku link**: `https://adamwalus.github.io/Arduino-lab/#N` (N = numer projektu).
+   - Potem **krótko wytłumacz w czacie co i jak** — jak dziecku: co robi układ, co gdzie się podłącza i dlaczego (np. „D13 to kranik, rezystor zwęża, GND to powrót”), co nowego w kodzie. Kilka punktów, bez lania wody.
+   - **Na końcu znowu ten sam link.**
+   - Całego kodu nie wklejaj do czatu, chyba że prosi.
 5. Zmiana w istniejącym projekcie: edytuj jego pliki, check, push, ten sam link.
 
 Jeśli nie da się wypchnąć (brak dostępu), powiedz to wprost i daj kod/instrukcję w czacie.

@@ -31,6 +31,9 @@ export function buildModel(project) {
   const raw = normWires(project);
   const wires = [];
   let sigIdx = 0;
+  const taken = new Set(raw.map((w) => wireColor(w.color, null)).filter(Boolean).map((c) => c.toLowerCase()));
+  const palette = SIGNAL_PALETTE.filter((c) => !taken.has(c.toLowerCase()));
+  const pal = palette.length ? palette : SIGNAL_PALETTE;
   raw.forEach((w, i) => {
     const A = parseEnd(project, w.from);
     const B = parseEnd(project, w.to);
@@ -50,7 +53,7 @@ export function buildModel(project) {
     }
     let def;
     if (kind === 'power') def = rail === 'GND' ? 'black' : rail === '5V' || rail === 'VIN' ? 'red' : 'orange';
-    else def = SIGNAL_PALETTE[sigIdx++ % SIGNAL_PALETTE.length];
+    else def = pal[sigIdx++ % pal.length];
     wires.push({ i, a, b, kind, rail, color: wireColor(w.color, wireColor(def)), rawColor: w.color, note: w.note });
   });
   return { board, parts, byId, wires };
@@ -146,7 +149,7 @@ export function renderDiagram(project) {
     let w = PW;
     colParts.forEach((p) => {
       const I = info[p.id];
-      const pw = Math.max(PW, Math.max(I.top.length, I.bottom.length) * 34 + 24, measure(partTitle(p)) + 26);
+      const pw = Math.max(PW, Math.max(I.top.length, I.bottom.length) * 34 + 24, measure(partTitle(p)) + 26 + (p.type === 'led' ? 22 : 0));
       sizes[p.id] = { w: pw, h: HEAD + Math.max(1, I.left.length + I.free.length, I.right.length) * ROW + 10 + (I.top.length ? 12 : 0) + (I.bottom.length ? 12 : 0) };
       w = Math.max(w, pw);
     });
