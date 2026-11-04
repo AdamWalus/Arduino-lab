@@ -14,6 +14,7 @@ Wejście chronione PIN-em 3078 (tylko kosmetycznie — repo jest publiczne).
 
 ## Standardowe zadanie: „zrób X”
 
+0. **Najpierw, zanim cokolwiek zrobisz w repo**, napisz w czacie słownie, co i jak podłączyć (jak dziecku: która nóżka do którego pinu i dlaczego). Dopiero potem siadaj do roboty (kroki 1–4).
 1. Dodaj projekt w `projects/RRRR-MM-DD-krotka-nazwa/` (dzisiejsza data, małe litery, myślniki):
    - `project.json` (format niżej),
    - `sketch.ino` (kod),
