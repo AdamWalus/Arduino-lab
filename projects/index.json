@@ -100,5 +100,26 @@
     ],
     "status": "ok",
     "missing": []
+  },
+  {
+    "n": 7,
+    "slug": "2026-11-04-swiatla-z-buzzerem",
+    "title": "Światła na przycisk z pikaniem na zielonym",
+    "board": "nano",
+    "date": "2026-11-04",
+    "summary": "Normalnie czerwone. Klik → żółte → zielone z piknięciem co sekundę → żółte → czerwone.",
+    "tags": [
+      "led",
+      "przycisk",
+      "buzzer",
+      "tone",
+      "for",
+      "światła"
+    ],
+    "status": "warn",
+    "missing": [
+      "Przycisk (tact switch)",
+      "Buzzer"
+    ]
   }
 ]

@@ -1,0 +1,146 @@
+{
+  "slug": "2026-11-04-swiatla-z-buzzerem",
+  "title": "Światła na przycisk z pikaniem na zielonym",
+  "date": "2026-11-04",
+  "board": "nano",
+  "summary": "Normalnie czerwone. Klik → żółte → zielone z piknięciem co sekundę → żółte → czerwone.",
+  "tags": [
+    "led",
+    "przycisk",
+    "buzzer",
+    "tone",
+    "for",
+    "światła"
+  ],
+  "parts": [
+    {
+      "id": "rR",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "ledR",
+      "type": "led",
+      "color": "red"
+    },
+    {
+      "id": "rY",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "ledY",
+      "type": "led",
+      "color": "yellow"
+    },
+    {
+      "id": "rG",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "ledG",
+      "type": "led",
+      "color": "green"
+    },
+    {
+      "id": "btn",
+      "type": "button"
+    },
+    {
+      "id": "bz",
+      "type": "buzzer"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:D10",
+      "to": "rR:1",
+      "color": "orange"
+    },
+    {
+      "from": "rR:2",
+      "to": "ledR:A"
+    },
+    {
+      "from": "ledR:C",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D11",
+      "to": "rY:1",
+      "color": "yellow"
+    },
+    {
+      "from": "rY:2",
+      "to": "ledY:A"
+    },
+    {
+      "from": "ledY:C",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D12",
+      "to": "rG:1",
+      "color": "green"
+    },
+    {
+      "from": "rG:2",
+      "to": "ledG:A"
+    },
+    {
+      "from": "ledG:C",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D2",
+      "to": "btn:1",
+      "color": "blue"
+    },
+    {
+      "from": "btn:2",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D8",
+      "to": "bz:+",
+      "color": "purple"
+    },
+    {
+      "from": "bz:-",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "Odepnij USB. Nano leży obok płytki, łączysz kabelkami.",
+    "Czerwona: rezystor 220 Ω w **e2** i **e5**, dioda dłuższą nóżką w **d5**, krótszą w **e6**.",
+    "Żółta: rezystor w **e7** i **e10**, dioda dłuższą w **d10**, krótszą w **e11**.",
+    "Zielona: rezystor w **e12** i **e15**, dioda dłuższą w **d15**, krótszą w **e16**.",
+    "Przycisk **nad środkowym rowkiem**: jedna nóżka w **e17**, ta po przekątnej w **f19**.",
+    "Buzzer: **+** w **e21**, **−** w **e23**.",
+    "Czarne kabelki do **szyny − (góra)** z: **a6**, **a11**, **a16**, **a23**. Z **j19** do **szyny − (dół)**.",
+    "Mostek: czarny kabel **szyna − (góra) → szyna − (dół)**.",
+    "Z Nano: **D10 → a2**, **D11 → a7**, **D12 → a12**, **D2 → a17**, **D8 → a21**.",
+    "Z Nano: **GND → szyna − (góra)**.",
+    "Podłącz USB i wgraj kod. Kliknij przycisk."
+  ],
+  "explain": [
+    "Normalnie świeci czerwone. `digitalRead(przycisk) == LOW` = przycisk wciśnięty (dzięki `INPUT_PULLUP` puszczony daje HIGH).",
+    "Na zielonym pętla `for` robi 8 razy: pik 200 ms + cisza 800 ms = **dokładnie 1 sekunda**. Długość zielonego zmieniasz w `czasZielonego`.",
+    "Każda dioda ma swój rezystor 220 Ω. GND wszystkiego idzie przez szynę −, bo Nano ma tylko 2 piny GND."
+  ],
+  "expected": "Świeci czerwone. Po kliknięciu: 2 s żółte, 8 s zielone z piknięciem co sekundę, 2 s żółte, znowu czerwone.",
+  "troubleshooting": [
+    "Sekwencja leci sama w kółko — przycisk zwarty przez płytkę: musi stać nad środkowym rowkiem, nóżki po przekątnej.",
+    "Nic nie pika — sprawdź + buzzera na D8. Aktywny buzzer piszczy swoim tonem, to normalne.",
+    "Któraś dioda nie świeci — odwróć ją (dłuższa nóżka w stronę rezystora)."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 7
+}
