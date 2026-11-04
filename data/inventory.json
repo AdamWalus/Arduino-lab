@@ -1,0 +1,14 @@
+{
+  "_info": "Magazyn części. qty: null = nie wiadomo ile / dużo. Typy jak w js/parts.js, płytki jak w js/boards.js. Rezystory osobno dla każdej wartości.",
+  "items": [
+    { "type": "nano", "qty": 1, "note": "klon, mini USB, Old Bootloader" },
+    { "type": "led", "qty": null, "note": "zielone, czerwone, żółte" },
+    { "type": "resistor", "value": "220Ω", "qty": null },
+    { "type": "resistor", "value": "1kΩ", "qty": null },
+    { "type": "resistor", "value": "10kΩ", "qty": null },
+    { "type": "ldr", "qty": 1, "note": "goły fotorezystor, 2 nóżki" },
+    { "type": "bmp280", "qty": 1, "note": "płytka HW-611" },
+    { "type": "breadboard", "qty": 1, "note": "płytka stykowa" },
+    { "type": "jumper", "qty": null, "note": "przewody męsko-męskie i męsko-żeńskie" }
+  ]
+}

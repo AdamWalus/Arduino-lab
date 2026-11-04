@@ -1,0 +1,61 @@
+{
+  "slug": "2026-10-14-blink",
+  "title": "Mrugająca dioda",
+  "date": "2026-10-14",
+  "board": "nano",
+  "summary": "Pierwszy układ: dioda z rezystorem na D13, mruga co pół sekundy.",
+  "tags": [
+    "led",
+    "podstawy"
+  ],
+  "parts": [
+    {
+      "id": "r1",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "led1",
+      "type": "led",
+      "color": "green"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:D13",
+      "to": "r1:1",
+      "color": "orange"
+    },
+    {
+      "from": "r1:2",
+      "to": "led1:A",
+      "note": "rezystor i dłuższa nóżka diody w tej samej kolumnie"
+    },
+    {
+      "from": "led1:C",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "Wsadź Nano w płytkę **okrakiem nad środkowym rowkiem** (jeden rząd nóżek po jednej stronie, drugi po drugiej).",
+    "Wsadź diodę obok Nano, każda nóżka w **inną kolumnę**. Dłuższa nóżka = A (plus).",
+    "Rezystor 220 Ω: jeden koniec w **kolumnie dłuższej nóżki** diody, drugi w nowej, wolnej kolumnie.",
+    "Kabel z tej nowej kolumny do pinu **D13**.",
+    "Kabel z kolumny **krótszej nóżki** diody do **GND**.",
+    "Podłącz USB, w Arduino IDE wybierz płytkę i port, wgraj kod."
+  ],
+  "explain": [
+    "Prąd musi zrobić kółko: wychodzi z D13, przechodzi przez rezystor i diodę i wraca do GND. Jak kółko jest przerwane — nic nie świeci.",
+    "`digitalWrite(13, HIGH)` daje 5V na D13 (dioda świeci), `LOW` zabiera napięcie (gaśnie). Rezystor ogranicza prąd, żeby dioda się nie spaliła."
+  ],
+  "expected": "Dioda mruga: pół sekundy świeci, pół sekundy nie.",
+  "troubleshooting": [
+    "Nie świeci — odwróć diodę.",
+    "Błąd przy wgrywaniu — Procesor: **ATmega328P (Old Bootloader)** i właściwy port COM.",
+    "Sprawdź, czy rezystor i nóżka diody są naprawdę w tej samej kolumnie."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 1
+}

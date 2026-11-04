@@ -1,0 +1,157 @@
+{
+  "slug": "2026-10-21-bmp280",
+  "title": "Czujnik BMP280 (temperatura i ciśnienie)",
+  "date": "2026-10-21",
+  "board": "nano",
+  "summary": "BMP280 przez I2C: temperatura i ciśnienie w Monitorze portu. Ze sprawozdaniem.",
+  "tags": [
+    "bmp280",
+    "i2c",
+    "temperatura",
+    "ciśnienie",
+    "sprawozdanie"
+  ],
+  "parts": [
+    {
+      "id": "bmp",
+      "type": "bmp280"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:3V3",
+      "to": "bmp:VCC",
+      "color": "red",
+      "note": "3,3V — nie 5V!"
+    },
+    {
+      "from": "board:GND",
+      "to": "bmp:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:A5",
+      "to": "bmp:SCL",
+      "color": "green"
+    },
+    {
+      "from": "board:A4",
+      "to": "bmp:SDA",
+      "color": "white"
+    }
+  ],
+  "steps": [
+    "Czujnik w płytkę stykową, każda nóżka w swojej kolumnie.",
+    "Kolumna **VCC** → **3V3** Nano (nie 5V!).",
+    "Kolumna **GND** → **GND**.",
+    "Kolumna **SCL** → **A5**.",
+    "Kolumna **SDA** → **A4**.",
+    "**CSB** i **SDO** zostają wolne.",
+    "W Arduino IDE zainstaluj bibliotekę **Adafruit BMP280** (jak zapyta o dodatkowe — Install all).",
+    "USB, wgraj kod, Monitor portu na **9600**."
+  ],
+  "explain": [
+    "BMP280 mierzy temperaturę i ciśnienie. Gada z Arduino przez **I2C** — wystarczą 2 kable danych (SDA dane, SCL zegar). W Nano I2C jest na stałe na A4 i A5.",
+    "`readPressure()` zwraca paskale, dlatego `/ 100.0` daje hPa."
+  ],
+  "expected": "Co 2 s w Monitorze portu temperatura (~25 °C w sali) i ciśnienie (~966 hPa w Bielsku).",
+  "troubleshooting": [
+    "„Nie widze czujnika” — zamienione SDA/SCL albo luźny kabel.",
+    "Bzdurne odczyty — sprawdź, czy VCC jest na 3V3."
+  ],
+  "images": [
+    {
+      "src": "uklad.jpg",
+      "caption": "Zmontowany układ",
+      "report": "connection"
+    }
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [
+    "Adafruit BMP280 Library"
+  ],
+  "report": {
+    "topic": "Czujnik BMP280 z Arduino Nano",
+    "date": "2026-10-21",
+    "goal": "Na zajęciach mieliśmy podpiąć czujnik i dowiedzieć się, co to w ogóle za czujnik. W moim przypadku był to BMP280, który podłączyłem do Arduino Nano i odczytałem z niego temperaturę, ciśnienie i wysokość.",
+    "needed": [
+      "Arduino Nano (klon z ATmega328P)",
+      "moduł BMP280 (płytka HW-611)",
+      "płytka stykowa i kilka przewodów",
+      "kabel mini USB"
+    ],
+    "connection": "Czujnik wpiąłem w płytkę stykową i połączyłem kabelkami z Nano. Potrzebne są tylko 4 piny, CSB i SDO zostają wolne.",
+    "diagram": false,
+    "program": "Do obsługi czujnika wziąłem bibliotekę Adafruit BMP280 z menedżera bibliotek. Program najpierw próbuje znaleźć czujnik pod adresem 0x76, a jak go tam nie ma, to pod 0x77 (zależy od modułu). Potem co 2 sekundy czyta temperaturę i ciśnienie i wypisuje je w monitorze portu szeregowego.",
+    "programAfter": "readPressure() zwraca ciśnienie w paskalach, dlatego dzielę przez 100, żeby wyszło w hPa.",
+    "results": [
+      {
+        "text": "Po wgraniu programu w monitorze portu (9600 baud) co ok. 2 sekundy pojawiały się nowe odczyty. Najpierw czujnik leżał normalnie na płytce:",
+        "table": {
+          "head": [
+            "Pomiar",
+            "Temperatura [°C]",
+            "Ciśnienie [hPa]"
+          ],
+          "rows": [
+            [
+              "1",
+              "25,30",
+              "966,44"
+            ],
+            [
+              "2",
+              "25,31",
+              "966,48"
+            ],
+            [
+              "3",
+              "25,31",
+              "966,46"
+            ]
+          ]
+        },
+        "image": "przed.jpg",
+        "caption": "Odczyty przed dotknięciem czujnika"
+      },
+      {
+        "text": "Żeby sprawdzić czy czujnik w ogóle reaguje, przyłożyłem do niego palec. Temperatura od razu zaczęła rosnąć:",
+        "table": {
+          "head": [
+            "Pomiar",
+            "Temperatura [°C]",
+            "Ciśnienie [hPa]"
+          ],
+          "rows": [
+            [
+              "1",
+              "29,09",
+              "966,40"
+            ],
+            [
+              "2",
+              "30,08",
+              "966,33"
+            ],
+            [
+              "3",
+              "30,81",
+              "966,36"
+            ]
+          ]
+        },
+        "image": "po.jpg",
+        "caption": "Odczyty po przyłożeniu palca do czujnika"
+      },
+      {
+        "text": "W kilka sekund temperatura poszła w górę o ponad 5°C (z ok. 25,3°C do 30,8°C) i dalej rosła. Ciśnienie praktycznie stało w miejscu, zmieniało się tylko o kilka setnych hPa, tak samo jak przed dotknięciem."
+      }
+    ],
+    "conclusions": [
+      "Układ ruszył od razu i czujnik odpowiadał po I2C bez żadnych problemów. Fajne w I2C jest to, że wystarczą tylko dwa kable danych (SDA i SCL), a na tych samych liniach można by jeszcze podpiąć inne urządzenia z innymi adresami.",
+      "Test z palcem pokazał, że czujnik szybko łapie zmianę temperatury. Palec nie zmienia ciśnienia, więc ciśnienie zostało na tym samym poziomie, czyli wszystko się zgadza.",
+      "Temperatura ok. 25°C w spoczynku jest pewnie trochę zawyżona przez ciepło od płytki i komputera obok."
+    ]
+  },
+  "n": 6
+}

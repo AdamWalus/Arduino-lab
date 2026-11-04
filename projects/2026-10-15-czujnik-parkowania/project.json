@@ -1,0 +1,77 @@
+{
+  "slug": "2026-10-15-czujnik-parkowania",
+  "title": "Czujnik parkowania",
+  "date": "2026-10-15",
+  "board": "nano",
+  "summary": "HC-SR04 mierzy odległość, buzzer pika tym szybciej, im bliżej przeszkoda.",
+  "tags": [
+    "hc-sr04",
+    "odległość",
+    "buzzer",
+    "pulseIn"
+  ],
+  "parts": [
+    {
+      "id": "sonar",
+      "type": "hc-sr04"
+    },
+    {
+      "id": "bz",
+      "type": "buzzer"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:5V",
+      "to": "sonar:VCC",
+      "color": "red"
+    },
+    {
+      "from": "board:GND",
+      "to": "sonar:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D6",
+      "to": "sonar:TRIG",
+      "color": "yellow"
+    },
+    {
+      "from": "board:D5",
+      "to": "sonar:ECHO",
+      "color": "purple"
+    },
+    {
+      "from": "board:D3",
+      "to": "bz:+",
+      "color": "green"
+    },
+    {
+      "from": "bz:-",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "Nano w płytkę okrakiem nad rowkiem.",
+    "HC-SR04 wpięty w płytkę, każda z 4 nóżek w swojej kolumnie (oczka do przodu).",
+    "Kolumna **VCC** → **5V**.",
+    "Kolumna **GND** czujnika → **GND** (pierwszy pin GND).",
+    "Kolumna **TRIG** → **D6**, kolumna **ECHO** → **D5**.",
+    "Buzzer w płytkę: **+** → **D3**, **−** → **GND** (drugi pin GND).",
+    "USB, wgraj kod, zbliżaj rękę do czujnika. Odległość widać w Monitorze portu (9600)."
+  ],
+  "explain": [
+    "Czujnik działa jak nietoperz: **TRIG** każe mu wysłać ultradźwięk, **ECHO** daje HIGH tak długo, aż echo wróci.",
+    "Dźwięk przelatuje 1 cm tam i z powrotem w ok. 58 µs, więc `czas / 58` = centymetry.",
+    "`delay(cm * 10)`: im mniej cm, tym krótsza przerwa między piknięciami."
+  ],
+  "expected": "Powyżej 50 cm cisza, potem pikanie coraz szybsze, poniżej 5 cm ciągły pisk.",
+  "troubleshooting": [
+    "Ciągle 999 — zamienione TRIG/ECHO albo brak zasilania 5V czujnika.",
+    "Skaczące odczyty — miękkie powierzchnie (ubranie) słabo odbijają dźwięk."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 5
+}

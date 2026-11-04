@@ -1,0 +1,95 @@
+{
+  "slug": "2026-10-14-czujnik-swiatla",
+  "title": "Czujnik światła + dioda",
+  "date": "2026-10-14",
+  "board": "nano",
+  "summary": "Goły fotorezystor z rezystorem 10 kΩ na A0. Ciemno → dioda się zapala.",
+  "tags": [
+    "fotorezystor",
+    "analog",
+    "led"
+  ],
+  "parts": [
+    {
+      "id": "ldr",
+      "type": "ldr",
+      "label": "Fotorezystor"
+    },
+    {
+      "id": "r10k",
+      "type": "resistor",
+      "value": "10kΩ"
+    },
+    {
+      "id": "r1",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "led1",
+      "type": "led",
+      "color": "green"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:5V",
+      "to": "ldr:1",
+      "color": "red"
+    },
+    {
+      "from": "board:A0",
+      "to": "ldr:2",
+      "color": "grey",
+      "note": "druga nóżka fotorezystora"
+    },
+    {
+      "from": "ldr:2",
+      "to": "r10k:1",
+      "note": "ta sama kolumna co druga nóżka fotorezystora"
+    },
+    {
+      "from": "r10k:2",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D13",
+      "to": "r1:1",
+      "color": "orange"
+    },
+    {
+      "from": "r1:2",
+      "to": "led1:A"
+    },
+    {
+      "from": "led1:C",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "Nano w płytkę okrakiem nad środkowym rowkiem.",
+    "Fotorezystor w płytkę, nóżki w **2 różne kolumny** (X i Y). Strona obojętna.",
+    "Kabel z kolumny **X** do **5V**.",
+    "Kabel z kolumny **Y** do **A0**.",
+    "Rezystor **10 kΩ** (brązowy-czarny-pomarańczowy): jeden koniec w kolumnie **Y**, drugi w nowej kolumnie **Z**.",
+    "Kabel z kolumny **Z** do **GND** (pierwszy pin GND).",
+    "Dioda: nóżki w 2 różne kolumny. Rezystor **220 Ω** od kolumny dłuższej nóżki do nowej kolumny, z niej kabel do **D13**.",
+    "Kabel z kolumny krótszej nóżki diody do **GND** (drugi pin GND).",
+    "Podłącz USB, wgraj kod, otwórz **Monitor portu szeregowego (9600)**, zasłoń czujnik ręką i ustaw `prog` pośrodku między liczbą dla jasno i ciemno."
+  ],
+  "explain": [
+    "Arduino nie umie zmierzyć oporu, tylko napięcie. Fotorezystor + rezystor 10 kΩ robią **dzielnik napięcia**: zmiana światła zmienia napięcie na A0, a `analogRead` zamienia je na liczbę 0–1023.",
+    "Czujnik mierzy → Arduino decyduje (`if`) → dioda wykonuje. Tak działa prawie każdy projekt."
+  ],
+  "expected": "Zasłaniasz czujnik — dioda się zapala. Odsłaniasz — gaśnie. W Monitorze portu widać liczby.",
+  "troubleshooting": [
+    "Działa na odwrót — zamień `<` na `>`.",
+    "Liczby stoją w miejscu — kabel A0 nie trafił w kolumnę Y.",
+    "Zawsze 1023 albo 0 — brakuje rezystora 10 kΩ do GND."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 2
+}

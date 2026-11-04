@@ -1,0 +1,104 @@
+[
+  {
+    "n": 1,
+    "slug": "2026-10-14-blink",
+    "title": "Mrugająca dioda",
+    "board": "nano",
+    "date": "2026-10-14",
+    "summary": "Pierwszy układ: dioda z rezystorem na D13, mruga co pół sekundy.",
+    "tags": [
+      "led",
+      "podstawy"
+    ],
+    "status": "ok",
+    "missing": []
+  },
+  {
+    "n": 2,
+    "slug": "2026-10-14-czujnik-swiatla",
+    "title": "Czujnik światła + dioda",
+    "board": "nano",
+    "date": "2026-10-14",
+    "summary": "Goły fotorezystor z rezystorem 10 kΩ na A0. Ciemno → dioda się zapala.",
+    "tags": [
+      "fotorezystor",
+      "analog",
+      "led"
+    ],
+    "status": "ok",
+    "missing": []
+  },
+  {
+    "n": 3,
+    "slug": "2026-10-14-przycisk",
+    "title": "Przycisk i dioda",
+    "board": "nano",
+    "date": "2026-10-14",
+    "summary": "Przycisk na D2 z INPUT_PULLUP, dioda na D13 świeci, gdy wciskasz.",
+    "tags": [
+      "przycisk",
+      "digitalRead",
+      "led"
+    ],
+    "status": "warn",
+    "missing": [
+      "Przycisk (tact switch)"
+    ]
+  },
+  {
+    "n": 4,
+    "slug": "2026-10-14-swiatla-drogowe",
+    "title": "Światła dla pieszych",
+    "board": "nano",
+    "date": "2026-10-14",
+    "summary": "3 diody, przycisk dla pieszego i buzzer pikający na czerwonym.",
+    "tags": [
+      "led",
+      "przycisk",
+      "buzzer",
+      "tone",
+      "for"
+    ],
+    "status": "warn",
+    "missing": [
+      "Przycisk (tact switch)",
+      "Buzzer"
+    ]
+  },
+  {
+    "n": 5,
+    "slug": "2026-10-15-czujnik-parkowania",
+    "title": "Czujnik parkowania",
+    "board": "nano",
+    "date": "2026-10-15",
+    "summary": "HC-SR04 mierzy odległość, buzzer pika tym szybciej, im bliżej przeszkoda.",
+    "tags": [
+      "hc-sr04",
+      "odległość",
+      "buzzer",
+      "pulseIn"
+    ],
+    "status": "warn",
+    "missing": [
+      "Czujnik odległości HC-SR04",
+      "Buzzer"
+    ]
+  },
+  {
+    "n": 6,
+    "slug": "2026-10-21-bmp280",
+    "title": "Czujnik BMP280 (temperatura i ciśnienie)",
+    "board": "nano",
+    "date": "2026-10-21",
+    "summary": "BMP280 przez I2C: temperatura i ciśnienie w Monitorze portu. Ze sprawozdaniem.",
+    "tags": [
+      "bmp280",
+      "i2c",
+      "temperatura",
+      "ciśnienie",
+      "sprawozdanie"
+    ],
+    "status": "ok",
+    "missing": []
+  }
+]

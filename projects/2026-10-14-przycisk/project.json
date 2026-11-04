@@ -1,0 +1,75 @@
+{
+  "slug": "2026-10-14-przycisk",
+  "title": "Przycisk i dioda",
+  "date": "2026-10-14",
+  "board": "nano",
+  "summary": "Przycisk na D2 z INPUT_PULLUP, dioda na D13 świeci, gdy wciskasz.",
+  "tags": [
+    "przycisk",
+    "digitalRead",
+    "led"
+  ],
+  "parts": [
+    {
+      "id": "btn",
+      "type": "button"
+    },
+    {
+      "id": "r1",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "led1",
+      "type": "led",
+      "color": "red"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:D2",
+      "to": "btn:1",
+      "color": "blue"
+    },
+    {
+      "from": "btn:2",
+      "to": "board:GND",
+      "color": "black",
+      "note": "nóżka po przekątnej"
+    },
+    {
+      "from": "board:D13",
+      "to": "r1:1",
+      "color": "orange"
+    },
+    {
+      "from": "r1:2",
+      "to": "led1:A"
+    },
+    {
+      "from": "led1:C",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "Nano w płytkę okrakiem nad rowkiem.",
+    "Przycisk **nad środkowym rowkiem** (2 nóżki po jednej stronie, 2 po drugiej). Inaczej płytka zewrze go na stałe.",
+    "Kabel z kolumny jednej nóżki przycisku do **D2**.",
+    "Kabel z kolumny nóżki **po przekątnej** do **GND**.",
+    "Dioda + rezystor 220 Ω jak w mrugającej diodzie: rezystor od kolumny dłuższej nóżki do nowej kolumny → kabel do **D13**.",
+    "Kolumna krótszej nóżki diody → **GND** (drugi pin GND).",
+    "USB, wgraj kod, wciśnij przycisk."
+  ],
+  "explain": [
+    "`INPUT_PULLUP` robi z D2 wejście, które normalnie czyta HIGH. Wciśnięty przycisk łączy D2 z GND, więc pin czyta LOW — dlatego **LOW = wciśnięty**.",
+    "Przycisk to mostek: puszczony rozłącza nóżki z dwóch stron, wciśnięty łączy."
+  ],
+  "expected": "Trzymasz przycisk — dioda świeci. Puszczasz — gaśnie.",
+  "troubleshooting": [
+    "Świeci cały czas — nóżki przycisku w tej samej kolumnie płytki albo wzięte z jednej strony mostka. Przełóż przycisk nad rowek, weź nóżki po przekątnej."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 3
+}

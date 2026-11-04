@@ -1,0 +1,142 @@
+{
+  "slug": "2026-10-14-swiatla-drogowe",
+  "title": "Światła dla pieszych",
+  "date": "2026-10-14",
+  "board": "nano",
+  "summary": "3 diody, przycisk dla pieszego i buzzer pikający na czerwonym.",
+  "tags": [
+    "led",
+    "przycisk",
+    "buzzer",
+    "tone",
+    "for"
+  ],
+  "parts": [
+    {
+      "id": "rG",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "ledG",
+      "type": "led",
+      "color": "green"
+    },
+    {
+      "id": "rY",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "ledY",
+      "type": "led",
+      "color": "yellow"
+    },
+    {
+      "id": "rR",
+      "type": "resistor",
+      "value": "220Ω"
+    },
+    {
+      "id": "ledR",
+      "type": "led",
+      "color": "red"
+    },
+    {
+      "id": "btn",
+      "type": "button"
+    },
+    {
+      "id": "bz",
+      "type": "buzzer"
+    }
+  ],
+  "wires": [
+    {
+      "from": "board:D12",
+      "to": "rG:1",
+      "color": "limegreen"
+    },
+    {
+      "from": "rG:2",
+      "to": "ledG:A"
+    },
+    {
+      "from": "ledG:C",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D11",
+      "to": "rY:1",
+      "color": "gold"
+    },
+    {
+      "from": "rY:2",
+      "to": "ledY:A"
+    },
+    {
+      "from": "ledY:C",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D10",
+      "to": "rR:1",
+      "color": "orange"
+    },
+    {
+      "from": "rR:2",
+      "to": "ledR:A"
+    },
+    {
+      "from": "ledR:C",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D2",
+      "to": "btn:1",
+      "color": "blue"
+    },
+    {
+      "from": "btn:2",
+      "to": "board:GND",
+      "color": "black"
+    },
+    {
+      "from": "board:D8",
+      "to": "bz:+",
+      "color": "purple"
+    },
+    {
+      "from": "bz:-",
+      "to": "board:GND",
+      "color": "black"
+    }
+  ],
+  "steps": [
+    "Nano w płytkę okrakiem nad rowkiem.",
+    "Kabel z **GND** Nano do **niebieskiej szyny (−)** płytki — to będzie wspólne GND. (Jeśli płytka nie ma szyn, użyj jednej kolumny jako GND.)",
+    "Trzy diody obok siebie, każda nóżka w innej kolumnie. Kolejność: zielona, żółta, czerwona.",
+    "Każda dioda dostaje **swój** rezystor 220 Ω: od kolumny dłuższej nóżki do nowej kolumny.",
+    "Z tych nowych kolumn kable: zielona → **D12**, żółta → **D11**, czerwona → **D10**.",
+    "Krótsze nóżki wszystkich diod → **szyna GND** (każda krótkim kabelkiem, każdy kabel w swoją dziurkę).",
+    "Przycisk nad rowkiem: jedna nóżka → **D2**, nóżka po przekątnej → **szyna GND**.",
+    "Buzzer: **+** → **D8**, **−** → **szyna GND**.",
+    "USB, wgraj kod, wciśnij przycisk."
+  ],
+  "explain": [
+    "`int czerwona = 10;` to **zmienna** — pinowi nadajesz nazwę. Jak przepniesz kabel, zmieniasz numer w jednym miejscu.",
+    "Program idzie z góry na dół, `delay` czeka. `for (int i = 0; i < 10; i++)` powtarza pikanie 10 razy.",
+    "Każda dioda ma swój rezystor, bo przy wspólnym rezystorze świecące naraz diody dzielą prąd nierówno."
+  ],
+  "expected": "Świeci zielone. Po wciśnięciu: 2 s żółte, 5 s czerwone z pikaniem, 2 s żółte, znowu zielone.",
+  "troubleshooting": [
+    "Sekwencja leci sama w kółko — przycisk zwarty przez płytkę (nie jest nad rowkiem).",
+    "Buzzer nie gra — sprawdź + i −; aktywny buzzer piszczy jednym tonem, to normalne."
+  ],
+  "codeFile": "sketch.ino",
+  "libraries": [],
+  "n": 4
+}
