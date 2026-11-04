@@ -384,7 +384,7 @@ export function renderBreadboard(L) {
       const by = a.y - 20;
       partSvg.push(`<line class="leg" x1="${a.x}" y1="${a.y}" x2="${a.x}" y2="${by + 4}"/><line class="leg" x1="${c.x}" y1="${c.y}" x2="${c.x}" y2="${by + 6}"/>`);
       partSvg.push(`<path class="ledb" d="M${mx - 8} ${by + 6} V${by - 3} A8 8 0 0 1 ${mx + 8} ${by - 3} V${by + 6} Z" fill="${LED[p.color] || LED.red}"/>`);
-      partSvg.push(`<text class="leg-t" x="${a.x - 3}" y="${a.y - 5}" text-anchor="end">+</text>`);
+
     } else if (p.type === 'ldr') {
       const [a, c] = pts;
       const mx = (a.x + c.x) / 2;
@@ -473,6 +473,18 @@ export function renderBreadboard(L) {
     } else d = `M${a.x} ${a.y} V${ly} H${tx} V${t.y} H${t.x}`;
     draw(d, w.color, [t]);
     wireSvg.push(`<rect class="j-end" x="${a.x - 3.5}" y="${a.y - 3.5}" width="7" height="7" fill="${wireColor(w.color, '#2f6fe4')}"/>`);
+  });
+  // podpis przy każdej nóżce: dokąd prowadzi (pin MCU), dla diody +/−
+  L.legs.forEach((l) => {
+    const p = L.byId[l.part];
+    if (!p || !l.hole || p.type === 'button' || p._mod !== undefined) return;
+    let t = l.board || '';
+    if (p.type === 'led') t = l.pin === 'A' ? '+' : '−';
+    if (p.type === 'buzzer') return; // ma już +/− pod spodem
+    if (!t) return;
+    const pt = hxy({ hole: l.hole });
+    const below = l.half === 'T';
+    tags.push(`<text class="leg-tag" x="${pt.x}" y="${below ? pt.y + 11 : pt.y - 6}" text-anchor="middle">${esc(t)}</text>`);
   });
   o.push(...partSvg, ...wireSvg, ...tags, '</svg>');
   return o.join('');
