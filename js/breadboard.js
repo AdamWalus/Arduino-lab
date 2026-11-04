@@ -288,18 +288,36 @@ export function renderBreadboard(L) {
   // płytka MCU pod spodem
   const b = L.board;
   const n = Math.max(...b.rows.map((r) => r.length));
+  const MP = 22; // rozstaw pinów na rysunku płytki (większy niż w realu, żeby podpisy się mieściły)
+  const usedSet = new Set(L.boardWires.map((w) => w.pin));
+  // rząd z większą liczbą użytych pinów na górę (bliżej płytki stykowej) — mniej kabli dookoła
+  const usedIn = (row) => row.filter((p) => usedSet.has(p)).length;
+  let rowsDraw = usedIn(b.rows[1]) > usedIn(b.rows[0]) ? [b.rows[1], b.rows[0]] : [b.rows[0], b.rows[1]];
+  // obróć płytkę (USB w prawo), jeśli wtedy kable mniej się krzyżują
+  const targetX = (w) => { const t = w.to.hole ? +w.to.hole.slice(1) : w.to.col; return t; };
+  const inversions = (rows) => {
+    const top = rows[0];
+    const ws = L.boardWires.filter((w) => top.includes(w.pin)).map((w) => [top.indexOf(w.pin), targetX(w)]);
+    let inv = 0;
+    for (let i = 0; i < ws.length; i++) for (let j = i + 1; j < ws.length; j++) if ((ws[i][0] - ws[j][0]) * (ws[i][1] - ws[j][1]) < 0) inv++;
+    return inv;
+  };
+  const flipped = rowsDraw.map((r) => [...r].reverse());
+  const flip = inversions(flipped) < inversions(rowsDraw);
+  if (flip) rowsDraw = flipped;
   const mcuX = X0 + P;
   const mcuY = bbBottom + 30 + nB * 8 + 16;
-  const mcuW = n * P + 50;
-  const mcuH = 92;
+  const mcuW = n * MP + 50;
+  const mcuH = 96;
   const pinXY = {};
-  b.rows.forEach((row, r) => row.forEach((pin, i) => {
-    const pt = { x: mcuX + 40 + i * P + P / 2, y: r === 0 ? mcuY + 14 : mcuY + mcuH - 14 };
+  rowsDraw.forEach((row, r) => row.forEach((pin, i) => {
+    const pt = { x: mcuX + 40 + i * MP + MP / 2, y: r === 0 ? mcuY + 14 : mcuY + mcuH - 14, bottom: r === 1 };
     if (!pinXY[pin]) pinXY[pin] = pt;
     else if (pin === 'GND') pinXY['GND#2'] = pt;
   }));
-  const H = mcuY + mcuH + 30;
-  const Wt = Math.max(W, mcuX + mcuW + 20);
+  const nBot = L.boardWires.filter((w) => (pinXY[w.pin] || {}).bottom).length + 1;
+  const H = mcuY + mcuH + 24 + nBot * 8;
+  const Wt = Math.max(W, mcuX + mcuW + 24 + nBot * 8);
 
   const o = [`<svg class="bb" viewBox="0 0 ${Wt} ${H}" width="${Wt}" height="${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Płytka stykowa">`];
   // ciało płytki
@@ -327,14 +345,14 @@ export function renderBreadboard(L) {
 
   // MCU
   o.push(`<rect class="bb-mcu" x="${mcuX}" y="${mcuY}" width="${mcuW}" height="${mcuH}" rx="6"/>`);
-  o.push(`<rect class="bb-usb" x="${mcuX - 14}" y="${mcuY + mcuH / 2 - 12}" width="26" height="24" rx="3"/>`);
+  o.push(`<rect class="bb-usb" x="${flip ? mcuX + mcuW - 12 : mcuX - 14}" y="${mcuY + mcuH / 2 - 12}" width="26" height="24" rx="3"/>`);
   o.push(`<text class="bb-mcu-t" x="${mcuX + mcuW / 2 + 10}" y="${mcuY + mcuH / 2 + 4}" text-anchor="middle">${esc(b.short)}</text>`);
   const usedPins = new Set(L.boardWires.map((w) => w.pin));
-  b.rows.forEach((row, r) => row.forEach((pin, i) => {
-    const x = mcuX + 40 + i * P + P / 2;
+  rowsDraw.forEach((row, r) => row.forEach((pin, i) => {
+    const x = mcuX + 40 + i * MP + MP / 2;
     const y = r === 0 ? mcuY + 14 : mcuY + mcuH - 14;
-    o.push(`<circle class="bb-mpin" cx="${x}" cy="${y}" r="3.4"/>`);
-    o.push(`<text class="bb-mlab${usedPins.has(pin) ? ' on' : ''}" x="${x}" y="${r === 0 ? y + 14 : y - 8}" text-anchor="middle">${esc(pin)}</text>`);
+    o.push(`<circle class="bb-mpin" cx="${x}" cy="${y}" r="3.6"/>`);
+    o.push(`<text class="bb-mlab${usedPins.has(pin) ? ' on' : ''}" x="${x}" y="${r === 0 ? y + 16 : y - 10}" text-anchor="middle">${esc(pin)}</text>`);
   }));
 
   // nóżki i części
@@ -415,13 +433,22 @@ export function renderBreadboard(L) {
     return { w, a: pinXY[key] || pinXY[w.pin], t: hxy(w.to) };
   }).filter((x) => x.a);
   // pasy pod płytką: kabel, który idzie dalej w prawo, bliżej płytki — mniej skrzyżowań
-  bw.sort((u, v) => (v.t.x - v.a.x) - (u.t.x - u.a.x));
+  const right = bw.filter((x) => x.t.x >= x.a.x).sort((u, v) => u.a.x - v.a.x);
+  const left = bw.filter((x) => x.t.x < x.a.x).sort((u, v) => v.a.x - u.a.x);
+  bw.length = 0;
+  bw.push(...right, ...left);
+  let k = 0;
   bw.forEach(({ w, a, t }, i) => {
     const ly = bbBottom + 14 + i * 8;
     const tx = chan(t.x, i);
-    const isBottomRow = a.y > mcuY + mcuH / 2;
-    const sx = isBottomRow ? a.x + P / 2 : a.x;
-    const d = `M${a.x} ${a.y}${isBottomRow ? ` H${sx}` : ''} V${ly} H${tx} V${t.y} H${t.x}`;
+    let d;
+    if (a.bottom) {
+      // pin z dolnego rzędu: w dół, w prawo za płytkę, do góry — nie zasłania podpisów
+      const dy = mcuY + mcuH + 12 + k * 8;
+      const rx = mcuX + mcuW + 12 + k * 8;
+      k++;
+      d = `M${a.x} ${a.y} V${dy} H${rx} V${ly} H${tx} V${t.y} H${t.x}`;
+    } else d = `M${a.x} ${a.y} V${ly} H${tx} V${t.y} H${t.x}`;
     draw(d, w.color, [t]);
     wireSvg.push(`<rect class="j-end" x="${a.x - 3.5}" y="${a.y - 3.5}" width="7" height="7" fill="${wireColor(w.color, '#2f6fe4')}"/>`);
   });
