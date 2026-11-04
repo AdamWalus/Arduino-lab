@@ -142,13 +142,13 @@ async function projectView(slug) {
 
     ${checkPanel(chk)}
 
+    ${bbSection(p)}
+
     <section class="card">
-      <div class="card-h"><h2>Schemat</h2><button class="btn small" data-zoom>Powiększ</button></div>
+      <div class="card-h"><h2>Schemat logiczny</h2><button class="btn small" data-zoom>Powiększ</button></div>
       <p class="hint">Na górze szyny zasilania (5V/3V3), na dole GND — tak jak szyny na płytce stykowej.</p>
       <div class="scroll diagram-wrap">${renderDiagram(p)}</div>
     </section>
-
-    ${bbSection(p)}
 
     <section class="card">
       <h2>Które piny na płytce</h2>
