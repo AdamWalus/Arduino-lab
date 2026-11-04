@@ -359,6 +359,9 @@ export function renderBreadboard(L) {
   const legXY = {};
   L.legs.forEach((l) => { if (l.hole) legXY[l.part + ':' + l.pin] = hxy({ hole: l.hole }); });
   const partSvg = [];
+  const tags = [];
+  const tag = (x, y, t, anchor = 'middle') => tags.push(`<text class="tag" x="${x}" y="${y}" text-anchor="${anchor}">${esc(t)}</text>`);
+  const COL_SHORT = { red: 'czerwona', green: 'zielona', yellow: 'żółta', blue: 'niebieska', white: 'biała', orange: 'pomarańcz.' };
   L.parts.forEach((p) => {
     const d = partDef(p);
     const pts = d.pins.map((x) => legXY[p.id + ':' + x.id]).filter(Boolean);
@@ -370,22 +373,30 @@ export function renderBreadboard(L) {
       partSvg.push(`<rect class="res" x="${mx - 14}" y="${a.y - 5}" width="28" height="10" rx="4"/>`);
       bands(parseOhm(p.value || '220')).forEach((col, i) => partSvg.push(`<rect x="${mx - 9 + i * 6}" y="${a.y - 5}" width="3" height="10" fill="${col}"/>`));
       partSvg.push(`<rect x="${mx + 9}" y="${a.y - 5}" width="2.5" height="10" fill="#c9a227"/>`);
+      tag(mx, a.y - 9, String(p.value || '220Ω').replace(/\s/g, ''));
     } else if (p.type === 'led') {
       const [a, c] = pts;
       const mx = (a.x + c.x) / 2;
       const by = a.y - 20;
       partSvg.push(`<line class="leg" x1="${a.x}" y1="${a.y}" x2="${a.x}" y2="${by + 4}"/><line class="leg" x1="${c.x}" y1="${c.y}" x2="${c.x}" y2="${by + 6}"/>`);
       partSvg.push(`<path class="ledb" d="M${mx - 8} ${by + 6} V${by - 3} A8 8 0 0 1 ${mx + 8} ${by - 3} V${by + 6} Z" fill="${LED[p.color] || LED.red}"/>`);
-      partSvg.push(`<text class="leg-t" x="${a.x - 3}" y="${a.y - 5}" text-anchor="end">+</text>`);
+      tag(a.x - 5, a.y - 4, '+', 'end');
+      tag(c.x + 5, c.y - 4, '−', 'start');
+      tag(mx, by - 13, 'LED ' + (COL_SHORT[p.color] || ''));
     } else if (p.type === 'ldr') {
       const [a, c] = pts;
       const mx = (a.x + c.x) / 2;
       partSvg.push(`<line class="leg" x1="${a.x}" y1="${a.y}" x2="${mx}" y2="${a.y - 14}"/><line class="leg" x1="${c.x}" y1="${c.y}" x2="${mx}" y2="${a.y - 14}"/>`);
       partSvg.push(`<circle class="ldr" cx="${mx}" cy="${a.y - 18}" r="7"/><path d="M${mx - 4} ${a.y - 21} q2 3 4 0 q2 -3 4 0" class="ldr-z"/>`);
+      tag(mx, a.y - 29, 'fotorezystor');
     } else if (p.type === 'buzzer') {
       const [a, c] = pts;
       const mx = (a.x + c.x) / 2;
-      partSvg.push(`<circle class="buzz" cx="${mx}" cy="${a.y - 2}" r="13"/><circle cx="${mx}" cy="${a.y - 2}" r="3" class="buzz-h"/><text class="leg-t w" x="${a.x}" y="${a.y - 6}" text-anchor="middle">+</text>`);
+      partSvg.push(`<circle class="buzz" cx="${mx}" cy="${a.y - 2}" r="13"/><circle cx="${mx}" cy="${a.y - 2}" r="3" class="buzz-h"/>`);
+      const pp = legXY[p.id + ':+'], pm = legXY[p.id + ':-'];
+      if (pp) tag(pp.x, pp.y + 13, '+');
+      if (pm) tag(pm.x, pm.y + 13, '−');
+      tag(mx, a.y - 19, 'buzzer');
     } else if (p.type === 'button') {
       const c = p._btn;
       const x = cx(c) - 4;
@@ -393,6 +404,7 @@ export function renderBreadboard(L) {
       const w = cx(c + 2) - cx(c) + 8;
       const h = rowY.f - rowY.e + 8;
       partSvg.push(`<rect class="btn-b" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/><circle class="btn-c" cx="${x + w / 2}" cy="${y + h / 2}" r="${Math.min(w, h) / 2 - 5}"/>`);
+      tag(x + w / 2, y - 4, 'przycisk');
     } else {
       // moduł: korpus nad płytką, nóżki do rzędu a
       const c0 = p._mod;
@@ -451,9 +463,10 @@ export function renderBreadboard(L) {
       d = `M${a.x} ${a.y} V${dy} H${rx} V${ly} H${tx} V${t.y} H${t.x}`;
     } else d = `M${a.x} ${a.y} V${ly} H${tx} V${t.y} H${t.x}`;
     draw(d, w.color, [t]);
+    tags.push(`<text class="tag" x="${t.x + 3.5}" y="${t.y - 6}" transform="rotate(-90 ${t.x + 3.5} ${t.y - 6})">${esc(w.pin)}</text>`);
     wireSvg.push(`<rect class="j-end" x="${a.x - 3.5}" y="${a.y - 3.5}" width="7" height="7" fill="${wireColor(w.color, '#2f6fe4')}"/>`);
   });
-  o.push(...partSvg, ...wireSvg, '</svg>');
+  o.push(...partSvg, ...wireSvg, ...tags, '</svg>');
   return o.join('');
 }
 
