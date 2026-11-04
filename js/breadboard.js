@@ -319,7 +319,7 @@ export function renderBreadboard(L) {
   const H = mcuY + mcuH + 24 + nBot * 8;
   const Wt = Math.max(W, mcuX + mcuW + 24 + nBot * 8);
 
-  const o = [`<svg class="bb" viewBox="0 0 ${Wt} ${H}" width="${Wt}" height="${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Płytka stykowa">`];
+  const o = [`<svg class="bb" viewBox="0 0 ${Wt} ${H}" width="${Wt}" height="${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Płytka stykowa">`, `<rect class="bb-bg" x="0" y="0" width="${Wt}" height="${H}" rx="8"/>`];
   // ciało płytki
   o.push(`<rect class="bb-body" x="${X0 - 26}" y="${top - 6}" width="${cols * P + 46}" height="${bbBottom - top + 12}" rx="6"/>`);
   o.push(`<rect class="bb-gap" x="${X0 - 4}" y="${rowY.e + P * 0.62}" width="${cols * P + 8}" height="${P * 1.15}" rx="2"/>`);

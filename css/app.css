@@ -144,8 +144,9 @@ pre.code code { background: none; padding: 0; font-size: inherit; }
 .gallery figcaption { font-size: .8rem; color: var(--muted); margin-top: 4px; }
 
 /* płytka stykowa */
-.bb-wrap { background: var(--surface-2); border-radius: 10px; padding: 6px; }
+.bb-wrap { background: #c9ced5; border-radius: 10px; padding: 0; }
 svg.bb { display: block; font-family: system-ui, sans-serif; }
+svg.bb .bb-bg { fill: #c9ced5; }
 svg.bb .bb-body { fill: #f3f1ea; stroke: #d8d4c8; }
 svg.bb .bb-gap { fill: #e1ddd1; }
 svg.bb .bb-h { fill: #4a4a44; }
@@ -171,7 +172,7 @@ svg.bb .mod { fill: #1f3d7a; stroke: #12294f; }
 svg.bb .mod-t { fill: #fff; font-size: 11px; font-weight: 700; }
 svg.bb .mod-p { fill: #dbe6ff; font-size: 8px; font-family: ui-monospace, monospace; font-weight: 700; }
 svg.bb .j { fill: none; stroke-width: 3.2; stroke-linecap: round; }
-svg.bb .j-case { fill: none; stroke: rgba(0,0,0,.35); stroke-width: 5; stroke-linecap: round; }
+svg.bb .j-case { fill: none; stroke: rgba(255,255,255,.55); stroke-width: 5.5; stroke-linecap: round; }
 svg.bb .j-case.is-white { stroke: #6e7781; }
 svg.bb .j-end { stroke: rgba(0,0,0,.5); stroke-width: 1; }
 .bb-list summary { cursor: pointer; font-weight: 600; margin-top: 8px; }
