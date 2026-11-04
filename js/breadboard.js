@@ -415,7 +415,8 @@ export function renderBreadboard(L) {
   const draw = (d, color, ends) => {
     const c = wireColor(color, '#2f6fe4');
     const white = c.toLowerCase() === '#f2f2f2';
-    wireSvg.push(`<path class="j-case${white ? ' is-white' : ''}" d="${d}"/><path class="j" d="${d}" stroke="${c}"/>`);
+    const dark = ['#1f2328', '#000', '#000000', 'black'].includes(c.toLowerCase());
+    wireSvg.push(`<path class="j-case${white ? ' is-white' : ''}${dark ? ' is-dark' : ''}" d="${d}"/><path class="j" d="${d}" stroke="${c}"/>`);
     ends.forEach((pt) => wireSvg.push(`<rect class="j-end" x="${pt.x - 3}" y="${pt.y - 3}" width="6" height="6" fill="${c}"/>`));
   };
   const chan = (x, i) => x + P / 2 + ((i % 3) - 1) * 2.4;
